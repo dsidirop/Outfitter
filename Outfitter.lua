@@ -1050,7 +1050,7 @@ function Outfitter_InventoryChanged(pEvent)
 		return ;
 	end
 
-	Outfitter_InventoryChanged2();
+	AceEvent:ScheduleEvent("OutfitterUnitInventoryChanged", Outfitter_InventoryChanged2, 0.5);
 end
 
 function Outfitter_InventoryChanged2()
