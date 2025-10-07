@@ -4081,6 +4081,12 @@ end
 local _lastAuraStatesScanTimestamp = 0
 function Outfitter_UpdateAuraStates()
     if gOutfitter_InCombat then
+        if Outfitter_PlayerClassInEnglish == "PALADIN"
+                or Outfitter_PlayerClassInEnglish == "WARRIOR"
+                or Outfitter_PlayerClassInEnglish == "WARLOCK" then
+            return -- paladins/warriors/warlocks dont have any special auras we care about    so just guard-close here 
+        end
+
         local now = GetTime()
         if now - _lastAuraStatesScanTimestamp <= 1 then
             -- throttle-down the buff-rescanning mechanism when in-combat to avoid performance issues especially in raids!
@@ -4088,27 +4094,29 @@ function Outfitter_UpdateAuraStates()
         end
         _lastAuraStatesScanTimestamp = now
     end
+
+    if Outfitter_PlayerClassInEnglish == "DRUID" then
+        -- As of 1.12 aura changes are the only way to detect shapeshifts, so update those too
+
+        Outfitter_UpdateShapeshiftState();
+        return
+    end
     
-	local vAuraStates = Outfitter_GetPlayerAuraStates(); -- check for special aura outfits
+    local vAuraStates = Outfitter_GetPlayerAuraStates(); -- check for special buffs for rogues/priests/shamans/mages/hunters
+    for vSpecialID, vIsActive in vAuraStates do
+        if vSpecialID == "Feigning" then -- priest
+            gOutfitter_IsFeigning = vIsActive;
+        else
+            if not gOutfitter_SpecialState[vSpecialID] then
+                gOutfitter_SpecialState[vSpecialID] = false;
+            end
 
-	for vSpecialID, vIsActive in vAuraStates do
-		if vSpecialID == "Feigning" then -- priest
-			gOutfitter_IsFeigning = vIsActive;
-		else
-			if not gOutfitter_SpecialState[vSpecialID] then
-				gOutfitter_SpecialState[vSpecialID] = false;
-			end
-
-			if gOutfitter_SpecialState[vSpecialID] ~= vIsActive then
-				gOutfitter_SpecialState[vSpecialID] = vIsActive;
-				Outfitter_SetSpecialOutfitEnabled(vSpecialID, vIsActive);
-			end
-		end
-	end
-
-	-- As of 1.12 aura changes are the only way to detect shapeshifts, so update those too
-
-	Outfitter_UpdateShapeshiftState();
+            if gOutfitter_SpecialState[vSpecialID] ~= vIsActive then
+                gOutfitter_SpecialState[vSpecialID] = vIsActive;
+                Outfitter_SetSpecialOutfitEnabled(vSpecialID, vIsActive);
+            end
+        end
+    end
 end
 
 function Outfitter_UpdateShapeshiftState()
