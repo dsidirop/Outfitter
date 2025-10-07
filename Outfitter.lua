@@ -327,24 +327,25 @@ local Outfitter_cClassSpecialOutfits = {
 };
 
 local gOutfitter_SpellNameSpecialID = {
-	[Outfitter_cAspectOfTheCheetah] = "Cheetah",
+	[Outfitter_cEvocate] = "Evocate",
 	[Outfitter_cAspectOfThePack] = "Pack",
-	[Outfitter_cAspectOfTheBeast] = "Beast",
 	[Outfitter_cAspectOfTheWild] = "Wild",
 	[Outfitter_cAspectOfTheBeast] = "Beast",
-	[Outfitter_cEvocate] = "Evocate",
+	[Outfitter_cAspectOfTheCheetah] = "Cheetah",
 };
 
-local gOutfitter_AuraIconSpecialID = {
-	["INV_Misc_Fork&Knife"] = "Dining",
-	["INV_Misc_Food_28"] = "Dining",
-	["Spell_Shadow_Shadowform"] = "Shadowform",
-	["Spell_Nature_SpiritWolf"] = "GhostWolf",
-	["Ability_Rogue_FeignDeath"] = "Feigning",
-	["Ability_Hunter_AspectOfTheMonkey"] = "Monkey",
-	["Spell_Nature_RavenForm"] = "Hawk",
-	["Ability_Mount_Pinktiger"] = "Beast",
-};
+local gOutfitter_AuraIconSpecialID = { --@formatter:off
+	["INV_Misc_Food_28"]           = "Dining",
+	["INV_Misc_Fork&Knife"]        = "Dining",
+
+	["Ability_Rogue_FeignDeath"]   = "Feigning",      --  priests/rogues
+    ["Spell_Nature_SpiritWolf"]    = "GhostWolf",     --  shamans
+	["Spell_Shadow_Shadowform"]    = "Shadowform",    --  priests
+
+    ["Spell_Nature_RavenForm"]           = "Hawk",    --  hunters
+	["Ability_Mount_Pinktiger"]          = "Beast",   --  hunters
+	["Ability_Hunter_AspectOfTheMonkey"] = "Monkey",  --  hunters
+}; --@formatter:on
 
 local Outfitter_cSpecialOutfitDescriptions = {
 	ArgentDawn = Outfitter_cArgentDawnOutfitDescription,
@@ -943,7 +944,9 @@ function Outfitter_BankFrameClosed()
 end
 
 function Outfitter_RegenEnabled(pEvent)
-	gOutfitter_InCombat = false;
+	gOutfitter_InCombat = false; -- order
+
+    Outfitter_UpdateAuraStates(); -- order   now force an aura-state-reevaluation considering that we throttle down aura updates while in combat
 
 	-- Check if any shapeshift outfit is active for any class
 	for _, specialIDInfo in pairs(Outfitter_cShapeshiftSpecialIDs) do
@@ -3949,7 +3952,7 @@ end
 
 function Outfitter_SetSlotEnable(pSlotName, pEnable)
 	if not gOutfitter_SelectedOutfit then
-		return ;
+		return
 	end
 
 	if pEnable then
@@ -3968,7 +3971,7 @@ function Outfitter_SetSlotEnable(pSlotName, pEnable)
 end
 
 function Outfitter_GetSpecialOutfit(pSpecialID)
-	for vOutfitIndex, vOutfit in gOutfitter_Settings.Outfits.Special do
+	for __, vOutfit in gOutfitter_Settings.Outfits.Special do
 		if vOutfit.SpecialID == pSpecialID then
 			return vOutfit;
 		end
@@ -3980,20 +3983,31 @@ end
 function Outfitter_GetPlayerAuraStates()
 	local vAuraStates = {
 		Dining = false,
-		Shadowform = false,
 		Riding = false,
-		GhostWolf = false,
-		Feigning = false,
-		Evocate = false,
-		Monkey = false,
-		Hawk = false,
-		Cheetah = false,
-		Pack = false,
-		Beast = false,
-		Wild = false
-	};
+
+        -- mage
+        Evocate = false, -- detected by name
+
+        -- priests
+		Feigning = false, -- detected by texture
+		Shadowform = false, -- detected by texture
+
+        -- shamans
+        GhostWolf = false, -- detected by texture
+
+        -- hunters
+		Wild = false, -- detected by name
+		Pack = false, -- detected by name
+		Cheetah = false, -- detected by name
+
+        Hawk = false, -- detected by texture
+        Beast = false, -- detected by both name and texture
+        Monkey = false, -- detected by texture
+    };
 
 	local vBuffIndex = 1;
+    
+    -- print("** Outfitter_GetPlayerAuraStates")
 
 	while true do
 		vTexture = UnitBuff("player", vBuffIndex);
@@ -4002,11 +4016,11 @@ function Outfitter_GetPlayerAuraStates()
 			return vAuraStates;
 		end
 
-		local vStartIndex, vEndIndex, vTextureName = string.find(vTexture, "([^%\\]*)$");
+		local _, _, vTextureName = string.find(vTexture, "([^%\\]*)$");
 
 		--
 
-		local vSpecialID = gOutfitter_AuraIconSpecialID[vTextureName];
+		local vSpecialID = gOutfitter_AuraIconSpecialID[vTextureName]; -- try detect by buff-texture
 
 		if vSpecialID then
 			vAuraStates[vSpecialID] = true;
@@ -4023,14 +4037,14 @@ function Outfitter_GetPlayerAuraStates()
 			local vTextLine1, vTextLine2 = Outfitter_GetBuffTooltipText(vBuffIndex);
 
 			if vTextLine1 then
-				local vSpecialID = gOutfitter_SpellNameSpecialID[vTextLine1];
+				vSpecialID = gOutfitter_SpellNameSpecialID[vTextLine1]; -- try detect by buff-name
 
 				if vSpecialID then
 					vAuraStates[vSpecialID] = true;
 
 				elseif vTextLine2
 						and (
-						string.find(vTextLine2, Outfitter_cMountSpeedFormat) or --Mount fix by Red Mage Joe
+						string.find(vTextLine2, Outfitter_cMountSpeedFormat) or -- Mount fix by Red Mage Joe
 								string.find(vTextLine2, "Riding") or
 								string.find(vTextLine2, "Slow and steady...")
 				) then
@@ -4068,7 +4082,7 @@ function Outfitter_UpdateAuraStates()
 	local vAuraStates = Outfitter_GetPlayerAuraStates();
 
 	for vSpecialID, vIsActive in vAuraStates do
-		if vSpecialID == "Feigning" then
+		if vSpecialID == "Feigning" then -- priest
 			gOutfitter_IsFeigning = vIsActive;
 		else
 			if not gOutfitter_SpecialState[vSpecialID] then
@@ -4514,14 +4528,13 @@ function Outfitter_Initialize()
 end
 
 function Outfitter_InitializeOutfits()
-	local vOutfit, vItemLocation, vItem;
-	local vEquippableItems = OutfitterItemList_GetEquippableItems(true);
+	local vEquippableItems, vOutfit = OutfitterItemList_GetEquippableItems(true), nil;
 
 	-- Create the outfit categories
 
 	gOutfitter_Settings.Outfits = {};
 
-	for vCategoryIndex, vCategoryID in gOutfitter_cCategoryOrder do
+	for __, vCategoryID in gOutfitter_cCategoryOrder do
 		gOutfitter_Settings.Outfits[vCategoryID] = {};
 	end
 
