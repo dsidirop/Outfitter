@@ -9,6 +9,9 @@ local Outfitter_cInitializationEvent = "PLAYER_ENTERING_WORLD";
 -- BOE (Bind on Equip) cache to avoid repeated tooltip operations
 local Outfitter_BOECache = {};
 
+local _, Outfitter_PlayerClassInEnglish = UnitClass("player");
+Outfitter_PlayerClassInEnglish = string.upper(Outfitter_PlayerClassInEnglish or "UNKNOWN_CLASS");
+
 local BANKED_FONT_COLOR = { r = 0.25, g = 0.2, b = 1.0 };
 local BANKED_FONT_COLOR_CODE = "|cff4033ff";
 local OUTFIT_MESSAGE_COLOR = { r = 0.2, g = 0.75, b = 0.3 };
@@ -272,17 +275,17 @@ local Outfitter_cItemStatInfo = {
 	{ ID = "Skinning", Name = Outfitter_cSkinningStatName, Category = "Trade" },
 };
 
-local Outfitter_cNormalizedClassName = {
-	[Outfitter_cDruidClassName] = "Druid",
-	[Outfitter_cHunterClassName] = "Hunter",
-	[Outfitter_cMageClassName] = "Mage",
-	[Outfitter_cPaladinClassName] = "Paladin",
-	[Outfitter_cPriestClassName] = "Priest",
-	[Outfitter_cRogueClassName] = "Rogue",
-	[Outfitter_cShamanClassName] = "Shaman",
-	[Outfitter_cWarlockClassName] = "Warlock",
-	[Outfitter_cWarriorClassName] = "Warrior",
-};
+local Outfitter_cNormalizedClassName = { --@formatter:off
+	["MAGE"] = "Mage",
+	["DRUID"] = "Druid",
+	["ROGUE"] = "Rogue",
+	["SHAMAN"] = "Shaman",
+	["HUNTER"] = "Hunter",
+	["PRIEST"] = "Priest",
+	["PALADIN"] = "Paladin",
+	["WARLOCK"] = "Warlock",
+	["WARRIOR"] = "Warrior",
+}; --@formatter:off
 
 local Outfitter_cClassSpecialOutfits = {
 	Warrior = {
@@ -2709,8 +2712,7 @@ function Outfitter_ToggleOutfit(pOutfit, pCategoryID)
 end
 
 function Outfitter_OutfitSummary()
-	local _, vPlayerClass = UnitClass("player");
-	local vStatDistribution = gOutfitter_StatDistribution[vPlayerClass];
+	local vStatDistribution = gOutfitter_StatDistribution[Outfitter_PlayerClassInEnglish];
 	local vCurrentOutfitStats = OutfitterTankPoints_GetCurrentOutfitStats(vStatDistribution);
 
 	Outfitter_DumpArray("Current Stats", vCurrentOutfitStats);
@@ -4697,11 +4699,11 @@ function Outfitter_InitializeSpecialOccassionOutfits()
 end
 
 function Outfitter_InitializeClassOutfits()
-	local vClassName = Outfitter_cNormalizedClassName[UnitClass("player")];
+	local vClassName = Outfitter_cNormalizedClassName[Outfitter_PlayerClassInEnglish];
 	local vOutfits = Outfitter_cClassSpecialOutfits[vClassName];
 
 	if not vOutfits then
-		return ;
+		return;
 	end
 
 	for vIndex, vOutfitInfo in vOutfits do
@@ -5773,8 +5775,7 @@ function OutfitterItemList_GetEquippableItems(pIncludeItemStats)
 		gOutfitter_EquippableItems = OutfitterItemList_New();
 	end
 
-	local _, vPlayerClass = UnitClass("player");
-	local vStatDistribution = gOutfitter_StatDistribution[vPlayerClass];
+	local vStatDistribution = gOutfitter_StatDistribution[Outfitter_PlayerClassInEnglish];
 
 	if not gOutfitter_EquippableItems.InventoryItems
 			or pIncludeItemStats then
@@ -6757,11 +6758,10 @@ end
 
 function OutfitterTankPoints_New()
 	local vTankPointData = {};
-	local _, vPlayerClass = UnitClass("player");
-	local vStatDistribution = gOutfitter_StatDistribution[vPlayerClass];
+	local vStatDistribution = gOutfitter_StatDistribution[Outfitter_PlayerClassInEnglish];
 
 	if not vStatDistribution then
-		Outfitter_ErrorMessage("Outfitter: Missing stat distribution data for " .. vPlayerClass);
+		Outfitter_ErrorMessage("Outfitter: Missing stat distribution data for " .. Outfitter_PlayerClassInEnglish);
 	end
 
 	vTankPointData.PlayerLevel = UnitLevel("player");
@@ -6929,8 +6929,7 @@ function OutfitterTankPoints_GetCurrentOutfitStats(pStatDistribution)
 end
 
 function OutfitterTankPoints_Test()
-	local _, vPlayerClass = UnitClass("player");
-	local vStatDistribution = gOutfitter_StatDistribution[vPlayerClass];
+	local vStatDistribution = gOutfitter_StatDistribution[Outfitter_PlayerClassInEnglish];
 
 	local vTankPointData = OutfitterTankPoints_New();
 	local vStats = OutfitterTankPoints_GetCurrentOutfitStats(vStatDistribution);
