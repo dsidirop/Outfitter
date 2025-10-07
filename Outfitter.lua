@@ -297,6 +297,7 @@ local Outfitter_cClassSpecialOutfits = {
 		{ Name = Outfitter_cDruidAquaticForm, SpecialID = "Aquatic" },
 		{ Name = Outfitter_cDruidTravelForm, SpecialID = "Travel" },
 		{ Name = Outfitter_cDruidMoonkinForm, SpecialID = "Moonkin" },
+		{ Name = Outfitter_cDruidTreeForm, SpecialID = "Tree" },
 	},
 
 	Priest = {
@@ -363,6 +364,7 @@ local Outfitter_cSpecialOutfitDescriptions = {
 	BeastTrash = Outfitter_cBeastTrashOutfitDescription,
 	UndeadTrash = Outfitter_cUndeadTrashOutfitDescription,
 	DemonTrash = Outfitter_cDemonTrashOutfitDescription,
+	NonCombat = Outfitter_cNonCombatOutfitDescription,
 };
 
 -- Note that zone special outfits will be worn in the order
@@ -540,6 +542,7 @@ local Outfitter_cShapeshiftSpecialIDs = {
 	[Outfitter_cTravelForm] = { ID = "Travel" },
 	[Outfitter_cDireBearForm] = { ID = "Bear" },
 	[Outfitter_cMoonkinForm] = { ID = "Moonkin" },
+	[Outfitter_cTreeForm] = { ID = "Tree" },
 
 	-- Rogues
 
@@ -780,6 +783,7 @@ function Outfitter_PlayerLeavingWorld()
 end
 
 function Outfitter_PlayerEnteringWorld()
+	Outfitter_UpdateZone();
 	OutfitterItemList_FlushEquippableItems();
 
 	-- Clear BOE cache on login/reload
@@ -940,10 +944,20 @@ end
 
 function Outfitter_RegenEnabled(pEvent)
 	gOutfitter_InCombat = false;
+
+	-- Check if any shapeshift outfit is active for any class
+	for _, specialIDInfo in pairs(Outfitter_cShapeshiftSpecialIDs) do
+		if gOutfitter_SpecialState[specialIDInfo.ID] then
+			return; -- A shapeshift form is active, so don't apply the NonCombat outfit
+		end
+	end
+
+	Outfitter_SetSpecialOutfitEnabled("NonCombat", true);
 end
 
 function Outfitter_RegenDisabled(pEvent)
 	gOutfitter_InCombat = true;
+	Outfitter_SetSpecialOutfitEnabled("NonCombat", false);
 end
 
 function Outfitter_PlayerDead(pEvent)
@@ -1093,6 +1107,8 @@ function Outfitter_TargetChangedDelayedEvent()
 		Outfitter_SetSpecialOutfitEnabled("Critter", false);
 	end
 end
+
+
 
 function Outfitter_InventoryChanged(pEvent)
 	if arg1 ~= "player" then
@@ -4073,12 +4089,17 @@ end
 
 function Outfitter_UpdateShapeshiftState()
 	local vNumForms = GetNumShapeshiftForms();
+	local isAnyFormActive = false;
 
 	for vIndex = 1, vNumForms do
 		local vTexture, vName, vIsActive, vIsCastable = GetShapeshiftFormInfo(vIndex);
 		local vSpecialID = Outfitter_cShapeshiftSpecialIDs[vName];
 
 		if vSpecialID then
+			if vIsActive then
+				isAnyFormActive = true;
+			end
+
 			if not vIsActive then
 				vIsActive = false;
 			end
@@ -4093,6 +4114,12 @@ function Outfitter_UpdateShapeshiftState()
 			end
 		end
 	end
+
+	if not isAnyFormActive and not gOutfitter_InCombat then
+		Outfitter_SetSpecialOutfitEnabled("NonCombat", true);
+	else
+		Outfitter_SetSpecialOutfitEnabled("NonCombat", false);
+	end
 end
 
 function Outfitter_SetSpecialOutfitEnabled(pSpecialID, pEnable)
@@ -4102,15 +4129,17 @@ function Outfitter_SetSpecialOutfitEnabled(pSpecialID, pEnable)
 			or vOutfit.Disabled
 			or (pEnable and vOutfit.BGDisabled and Outfitter_InBattlegroundZone())
 			or (pEnable and vOutfit.InstDisabled and Outfitter_InInstanceZone()) then
-		return ;
+		return;
 	end
 
 	if pEnable then
-		-- Start monitoring health and mana if it's the dining outfit
 
+		-- Start monitoring health and mana if it's the dining outfit
+		-- If enabling the Dining outfit, disable NonCombat outfit
 		if pSpecialID == "Dining" then
 			Outfitter_ResumeEvent(OutfitterFrame, "UNIT_HEALTH");
 			Outfitter_ResumeEvent(OutfitterFrame, "UNIT_MANA");
+            --Outfitter_SetSpecialOutfitEnabled("NonCombat", false);
 		end
 
 		--
@@ -4125,6 +4154,8 @@ function Outfitter_SetSpecialOutfitEnabled(pSpecialID, pEnable)
 
 		if pSpecialID == "ArgentDawn" then
 			vWearBelowOutfit = Outfitter_GetSpecialOutfit("Riding");
+        elseif pSpecialID == "NonCombat" then
+            vWearBelowOutfit = Outfitter_GetSpecialOutfit("Dining");
 		end
 
 		--
@@ -4468,6 +4499,7 @@ function Outfitter_Initialize()
 	-- Make sure the outfit state is good
 
 	Outfitter_SetSpecialOutfitEnabled("Riding", false);
+	Outfitter_SetSpecialOutfitEnabled("NonCombat", false);
 	Outfitter_SetSpecialOutfitEnabled("Spirit", false);
 	Outfitter_UpdateAuraStates();
 
@@ -4572,6 +4604,15 @@ function Outfitter_InitializeSpecialOccassionOutfits()
 	-- Create the city outfit
 
 	Outfitter_CreateEmptySpecialOccassionOutfit("City", Outfitter_cCityOutfit);
+
+	-- Create the NonCombat outfit
+	vOutfit = Outfitter_GetSpecialOutfit("NonCombat");
+	if not vOutfit then
+		Outfitter_CreateEmptySpecialOccassionOutfit("NonCombat", Outfitter_cNonCombatOutfit);
+		vOutfit = Outfitter_GetSpecialOutfit("NonCombat");
+		vOutfit.BGDisabled = true;
+		vOutfit.InstDisabled = true;
+	end
 
 	-- Create class-specific outfits
 
