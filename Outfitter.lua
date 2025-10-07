@@ -4076,10 +4076,18 @@ function Outfitter_GetBuffTooltipText(pBuffIndex)
 	return vText1, vText2;
 end
 
+local _lastAuraStatesScanTimestamp = 0
 function Outfitter_UpdateAuraStates()
-	-- Check for special aura outfits
-
-	local vAuraStates = Outfitter_GetPlayerAuraStates();
+    if gOutfitter_InCombat then
+        local now = GetTime()
+        if now - _lastAuraStatesScanTimestamp <= 1 then
+            -- throttle-down the buff-rescanning mechanism when in-combat to avoid performance issues especially in raids!
+            return
+        end
+        _lastAuraStatesScanTimestamp = now
+    end
+    
+	local vAuraStates = Outfitter_GetPlayerAuraStates(); -- check for special aura outfits
 
 	for vSpecialID, vIsActive in vAuraStates do
 		if vSpecialID == "Feigning" then -- priest
