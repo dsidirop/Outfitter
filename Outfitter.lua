@@ -2161,12 +2161,14 @@ function Outfitter_Update(pUpdateSlotEnables)
 				nil, nil, nil, -- button, smallWidth, bigWidth
 				nil, -- highlightFrame
 				0, 0);                          -- smallHighlightWidth, bigHighlightWidth
+
 	elseif gOutfitter_CurrentPanel == 2 then
 		-- Options panel
 		OutfitterShowMinimapButton:SetChecked(not gOutfitter_Settings.Options.HideMinimapButton);
 		OutfitterRememberVisibility:SetChecked(not gOutfitter_Settings.Options.DisableAutoVisibility);
 		OutfitterShowHotkeyMessages:SetChecked(not gOutfitter_Settings.Options.DisableHotkeyMessages);
 		OutfitterShowCurrentOutfit:SetChecked(gOutfitter_Settings.Options.ShowCurrentOutfit);
+        OutfitterKeepScanningBuffsEvenInCombat:SetChecked(gOutfitter_Settings.Options.KeepScanningBuffsEvenInCombat);
 	end
 end
 
