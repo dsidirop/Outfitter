@@ -4057,12 +4057,20 @@ function Outfitter_GetPlayerAuraStates()
 								string.find(vTextLine2, "Slow and steady...")
 				) then
 					vAuraStates.Riding = true;
+                    
+                    if not gOutfitter_AuraIconSpecialID[vTextureName] then -- 00
+                        gOutfitter_AuraIconSpecialID[vTextureName] = "Riding";
+                    end
 				end
 			end
 		end
 
 		vBuffIndex = vBuffIndex + 1;
 	end
+    
+    -- 00   dynamically learn the riding-mount-textures and cache them for next time to avoid the expensive tooltip-scans we can afford
+    --      to do this for mounts because the textures are fairly standard and almost exclusively used for riding    but we cant do this
+    --      trick for all other buffs/auras because some buffs share textures and we can only rely on the localized-buff-name to truly tell them apart
 end
 
 function Outfitter_GetBuffTooltipText(pBuffIndex)
