@@ -4015,57 +4015,53 @@ function Outfitter_GetPlayerAuraStates()
         Monkey = false, -- detected by texture
     };
 
-	local vBuffIndex = 1;
+    local vTextureFilePath;
+    for vBuffIndex = 32, 0, -1 do --exhaustive search from 32 (most recent buff) down to 0 (oldest buff even though we could stop at 1) to prioritize the detection of recent buffs first
+        vTextureFilePath = UnitBuff("player", vBuffIndex);
 
-	while true do
-		vTexture = UnitBuff("player", vBuffIndex);
+        -- in turtle wow the textures sometimes come off dud even if they do exist which is weird of
+        -- course but it can bamboozle the detection-mechanism so we just scan all buffs down to 0 to be sure
+        if vTextureFilePath then
+            local _, _, vTextureName = string.find(vTextureFilePath, "([^%\\]*)$");
 
-		if not vTexture then
-			return vAuraStates;
-		end
+            local vSpecialID = gOutfitter_AuraIconSpecialID[vTextureName]; -- try detect by buff-texture
+            if vSpecialID then
+                vAuraStates[vSpecialID] = true;
 
-		local _, _, vTextureName = string.find(vTexture, "([^%\\]*)$");
+            elseif not vAuraStates.Dining and (
+                    string.find(vTextureName, "[Ii][Nn][Vv].?[Dd][Rr][Ii][Nn][Kk]..?.?.?.?.?.?.?.?.?.?.?$")  -- INV_Drink_11/14/18 etc
+                            or string.find(vTextureName, "[Ii][Nn][Vv].?[Mm][Ii][Ss][Cc].?[Ff][Oo][Oo][Dd]..?.?.?.?.?.?.?.?.?.?.?$") -- INV_Misc_Food_11/14/18 etc
+                            or string.find(vTextureName, "[Ii][Nn][Vv].?[Mm][Ii][Ss][Cc].?[Ff][Oo][Rr][Kk]..?.?.?.?.?.?.?.?.?.?.?$") -- INV_Misc_Fork&Knife_11/14/18 etc
+            ) then
+                vAuraStates.Dining = true;
+                if not gOutfitter_AuraIconSpecialID[vTextureName] then
+                    gOutfitter_AuraIconSpecialID[vTextureName] = "Dining"; -- cache it for next time so as to dodge regex-searching
+                end
 
-		--
+            else
+                local vTextLine1, vTextLine2 = Outfitter_GetBuffTooltipText(vBuffIndex);
 
-		local vSpecialID = gOutfitter_AuraIconSpecialID[vTextureName]; -- try detect by buff-texture
+                if vTextLine1 then
+                    vSpecialID = gOutfitter_SpellNameSpecialID[vTextLine1]; -- try detect by localized-buff-name
 
-		if vSpecialID then
-			vAuraStates[vSpecialID] = true;
+                    if vSpecialID then
+                        vAuraStates[vSpecialID] = true;
 
-			--
+                    elseif not vAuraStates.Riding and vTextLine2
+                            and (
+                            string.find(vTextLine2, Outfitter_cMountSpeedFormat) or -- Mount fix by Red Mage Joe
+                                    string.find(vTextLine2, "Riding") or
+                                    string.find(vTextLine2, "Slow and steady...")
+                    ) then
+                        vAuraStates.Riding = true;
 
-		elseif not vAuraStates.Dining
-				and string.find(vTextureName, "INV_Drink") then
-			vAuraStates.Dining = true;
-
-			--
-
-		else
-			local vTextLine1, vTextLine2 = Outfitter_GetBuffTooltipText(vBuffIndex);
-
-			if vTextLine1 then
-				vSpecialID = gOutfitter_SpellNameSpecialID[vTextLine1]; -- try detect by buff-name
-
-				if vSpecialID then
-					vAuraStates[vSpecialID] = true;
-
-				elseif not vAuraStates.Riding and vTextLine2
-						and (
-						string.find(vTextLine2, Outfitter_cMountSpeedFormat) or -- Mount fix by Red Mage Joe
-								string.find(vTextLine2, "Riding") or
-								string.find(vTextLine2, "Slow and steady...")
-				) then
-					vAuraStates.Riding = true;
-                    
-                    if not gOutfitter_AuraIconSpecialID[vTextureName] then -- 00
-                        gOutfitter_AuraIconSpecialID[vTextureName] = "Riding";
+                        if not gOutfitter_AuraIconSpecialID[vTextureName] then -- 00 smart caching
+                            gOutfitter_AuraIconSpecialID[vTextureName] = "Riding";
+                        end
                     end
-				end
-			end
-		end
-
-		vBuffIndex = vBuffIndex + 1;
+                end
+            end            
+        end
 	end
     
     return vAuraStates;
