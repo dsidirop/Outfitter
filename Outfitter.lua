@@ -4050,7 +4050,7 @@ function Outfitter_GetPlayerAuraStates()
 				if vSpecialID then
 					vAuraStates[vSpecialID] = true;
 
-				elseif vTextLine2
+				elseif not vAuraStates.Riding and vTextLine2
 						and (
 						string.find(vTextLine2, Outfitter_cMountSpeedFormat) or -- Mount fix by Red Mage Joe
 								string.find(vTextLine2, "Riding") or
@@ -4067,6 +4067,8 @@ function Outfitter_GetPlayerAuraStates()
 
 		vBuffIndex = vBuffIndex + 1;
 	end
+    
+    return vAuraStates;
     
     -- 00   dynamically learn the riding-mount-textures and cache them for next time to avoid the expensive tooltip-scans we can afford
     --      to do this for mounts because the textures are fairly standard and almost exclusively used for riding    but we cant do this
@@ -4102,7 +4104,7 @@ function Outfitter_UpdateAuraStates()
         if Outfitter_PlayerClassInEnglish == "PALADIN"
                 or Outfitter_PlayerClassInEnglish == "WARRIOR"
                 or Outfitter_PlayerClassInEnglish == "WARLOCK" then
-            return -- paladins/warriors/warlocks dont have any special auras we care about    so just guard-close here 
+            return -- paladins/warriors/warlocks dont have any special auras we care about in-combat    so just guard-close here 
         end
 
         local now = GetTime()
