@@ -1510,7 +1510,9 @@ function Outfitter_SetHideDisabledOutfits(pHideDisabledOutfits)
 end
 
 function Outfitter_SetKeepScanningBuffsEvenInCombat(pKeepScanningBuffsEvenInCombat)
-    gOutfitter_Settings.Options.KeepScanningBuffsEvenInCombat = pKeepScanningBuffsEvenInCombat;    
+    gOutfitter_Settings.Options.KeepScanningBuffsEvenInCombat = pKeepScanningBuffsEvenInCombat -- comes as 1 (checked) or nil (unchecked)
+            and true
+            or false;
 end
 
 function OutfitterMinimapDropDown_OnLoad(dropdown)
@@ -4012,8 +4014,6 @@ function Outfitter_GetPlayerAuraStates()
     };
 
 	local vBuffIndex = 1;
-    
-    -- print("** Outfitter_GetPlayerAuraStates")
 
 	while true do
 		vTexture = UnitBuff("player", vBuffIndex);
@@ -4482,13 +4482,17 @@ function Outfitter_Initialize()
 	if not gOutfitter_Settings then
 		gOutfitter_Settings = {};
 		gOutfitter_Settings.Version = 7;
-		gOutfitter_Settings.Options = {
-            KeepScanningBuffsEvenInCombat = true -- unfortunately needed for backwards compatibility
-        };
+		gOutfitter_Settings.Options = { };
 		gOutfitter_Settings.LastOutfitStack = {};
 		gOutfitter_Settings.HideHelm = {};
 		gOutfitter_Settings.HideCloak = {};
 	end
+
+    if gOutfitter_Settings.Options.KeepScanningBuffsEvenInCombat == nil then
+        -- first time initialization   unfortunately 'true' is needed for backwards compatibility
+        -- users must explicitly uncheck this option manually if they want it off
+        gOutfitter_Settings.Options.KeepScanningBuffsEvenInCombat = true
+    end
 
 	if not gOutfitter_Settings.HideHelm then
 		gOutfitter_Settings.HideHelm = {};
