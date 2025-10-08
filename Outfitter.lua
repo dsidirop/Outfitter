@@ -1509,6 +1509,10 @@ function Outfitter_SetHideDisabledOutfits(pHideDisabledOutfits)
 	Outfitter_Update(false);
 end
 
+function Outfitter_SetKeepScanningBuffsEvenInCombat(pKeepScanningBuffsEvenInCombat)
+    gOutfitter_Settings.Options.KeepScanningBuffsEvenInCombat = pKeepScanningBuffsEvenInCombat;    
+end
+
 function OutfitterMinimapDropDown_OnLoad(dropdown)
 	if ( not dropdown ) then
 		dropdown = this;
@@ -4081,6 +4085,10 @@ end
 local _lastAuraStatesScanTimestamp = 0
 function Outfitter_UpdateAuraStates()
     if gOutfitter_InCombat then
+        if not gOutfitter_Settings.Options.KeepScanningBuffsEvenInCombat then
+            return
+        end
+
         if Outfitter_PlayerClassInEnglish == "PALADIN"
                 or Outfitter_PlayerClassInEnglish == "WARRIOR"
                 or Outfitter_PlayerClassInEnglish == "WARLOCK" then
@@ -4467,14 +4475,16 @@ end
 
 function Outfitter_Initialize()
 	if gOutfitter_Initialized then
-		return ;
+		return;
 	end
 
-	--
+	-- first load of the addon?
 	if not gOutfitter_Settings then
 		gOutfitter_Settings = {};
 		gOutfitter_Settings.Version = 7;
-		gOutfitter_Settings.Options = {};
+		gOutfitter_Settings.Options = {
+            KeepScanningBuffsEvenInCombat = true -- unfortunately needed for backwards compatibility
+        };
 		gOutfitter_Settings.LastOutfitStack = {};
 		gOutfitter_Settings.HideHelm = {};
 		gOutfitter_Settings.HideCloak = {};
@@ -7040,7 +7050,7 @@ function Outfitter_pfUISkin()
 			end
 
 			OutfitterShowMinimapButton:SetPoint( "TOPLEFT", 15, -90 )
-			for _, v in { "ShowMinimapButton", "RememberVisibility", "ShowHotkeyMessages", "ShowCurrentOutfit", "HideDisabledOutfits" } do
+			for _, v in { "ShowMinimapButton", "RememberVisibility", "ShowHotkeyMessages", "ShowCurrentOutfit", "HideDisabledOutfits", "KeepScanningBuffsEvenInCombat" } do
 				local cb = getglobal( "Outfitter" .. v )
 				skin_checkbox( cb )
 			end

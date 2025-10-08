@@ -576,13 +576,13 @@
 						</Layers>
 						<Frames>
 							<CheckButton name="OutfitterShowMinimapButton" inherits="OptionsCheckButtonTemplate">
-								<Anchors>
+                                <Anchors>
 									<Anchor point="TOPLEFT">
-										<Offset>
+                                        <Offset>
 											<AbsDimension x="15" y="-120"/>
-										</Offset>
-									</Anchor>
-								</Anchors>
+                                        </Offset>
+                                    </Anchor>
+                                </Anchors>
 								<Scripts>
 									<OnLoad>
 										getglobal(this:GetName().."Text"):SetText(Outfitter_cShowMinimapButton);
@@ -690,6 +690,23 @@
 									</OnClick>
 								</Scripts>
 							</CheckButton>
+                            <CheckButton name="OutfitterKeepScanningBuffsEvenInCombat" inherits="OptionsCheckButtonTemplate">
+                                <Anchors>
+                                    <Anchor point="TOPLEFT" relativeTo="OutfitterHideDisabledOutfits" relativePoint="BOTTOMLEFT">
+                                        <Offset>
+                                            <AbsDimension x="0" y="-10"/>
+                                        </Offset>
+                                    </Anchor>
+                                </Anchors>
+                                <Scripts>
+                                    <OnLoad>
+                                        getglobal(this:GetName().."Text"):SetText(Outfitter_cKeepScanningBuffsEvenInCombat);
+                                    </OnLoad>
+                                    <OnClick>
+                                        Outfitter_SetKeepScanningBuffsEvenInCombat(this:GetChecked());
+                                    </OnClick>
+                                </Scripts>
+                            </CheckButton>
 						</Frames>
 						<Scripts>
 							<OnLoad>
