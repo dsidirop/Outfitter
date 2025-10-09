@@ -752,7 +752,7 @@
 								</FontString>
 								<FontString name="OutfitterAboutAuthor" text="Outfitter_cAuthor" inherits="GameFontHighlight">
 									<Size>
-										<AbsDimension x="230"/>
+										<AbsDimension x="230" y="0"/>
 									</Size>
 									<Anchors>
 										<Anchor point="TOP" relativeTo="OutfitterAboutTitleVersion" relativePoint="BOTTOM">
@@ -764,7 +764,7 @@
 								</FontString>
 								<FontString name="OutfitterTestersTitle" text="Outfitter_cTestersTitle" inherits="GameFontNormal">
 									<Size>
-										<AbsDimension x="230"/>
+										<AbsDimension x="230" y="0"/>
 									</Size>
 									<Anchors>
 										<Anchor point="TOP" relativeTo="OutfitterAboutTitleVersion" relativePoint="TOP">
@@ -776,7 +776,7 @@
 								</FontString>
 								<FontString name="OutfitterTestersNames" text="Outfitter_cTestersNames" inherits="GameFontHighlightSmall">
 									<Size>
-										<AbsDimension x="230"/>
+										<AbsDimension x="230" y="0"/>
 									</Size>
 									<Anchors>
 										<Anchor point="TOP" relativeTo="OutfitterTestersTitle" relativePoint="BOTTOM">
@@ -788,7 +788,7 @@
 								</FontString>
 								<FontString name="OutfitterSpecialThanksTitle" text="Outfitter_cSpecialThanksTitle" inherits="GameFontNormal">
 									<Size>
-										<AbsDimension x="230"/>
+										<AbsDimension x="230" y="0"/>
 									</Size>
 									<Anchors>
 										<Anchor point="TOP" relativeTo="OutfitterTestersNames" relativePoint="TOP">
@@ -800,7 +800,7 @@
 								</FontString>
 								<FontString name="OutfitterSpecialThanksNames" text="Outfitter_cSpecialThanksNames" inherits="GameFontHighlight">
 									<Size>
-										<AbsDimension x="230"/>
+										<AbsDimension x="230" y="0"/>
 									</Size>
 									<Anchors>
 										<Anchor point="TOP" relativeTo="OutfitterSpecialThanksTitle" relativePoint="BOTTOM">
@@ -1221,7 +1221,7 @@
 				</FontString>
 				<FontString name="$parentError" inherits="GameFontRed" hidden="true" text="Outfitter_cNameAlreadyUsedError">
 					<Size>
-						<AbsDimension x="280"/>
+						<AbsDimension x="280" y="0"/>
 					</Size>
 					<Anchors>
 						<Anchor point="BOTTOM">
@@ -1234,7 +1234,7 @@
 			</Layer>
 		</Layers>
 		<Frames>
-			<EditBox name="$parentName" letters="40" historyLines="0" autofocus="false" inherits="OutfitterInputBoxTemplate">
+			<EditBox name="$parentName" letters="40" historyLines="0" autoFocus="false" inherits="OutfitterInputBoxTemplate">
 				<Size>
 					<AbsDimension x="170" y="20" />
 				</Size>
@@ -1262,7 +1262,6 @@
 					<OnTextChanged>
 						OutfitterNameOutfit_Update()
 					</OnTextChanged>
-					<OnEditFocusLost></OnEditFocusLost>
 					<OnEscapePressed>
 						this:ClearFocus();
 					</OnEscapePressed>
@@ -1745,33 +1744,33 @@
 			</Layer>
 		</Layers>
 		<Frames>
-			<Frame name="$parentItem1" ID="1" hidden="true" inherits="OutfitterQuickSlotItemTemplate"/>
-			<Frame name="$parentItem2" ID="2" hidden="true" inherits="OutfitterQuickSlotItemTemplate"/>
-			<Frame name="$parentItem3" ID="3" hidden="true" inherits="OutfitterQuickSlotItemTemplate"/>
-			<Frame name="$parentItem4" ID="4" hidden="true" inherits="OutfitterQuickSlotItemTemplate"/>
-			<Frame name="$parentItem5" ID="5" hidden="true" inherits="OutfitterQuickSlotItemTemplate"/>
-			<Frame name="$parentItem6" ID="6" hidden="true" inherits="OutfitterQuickSlotItemTemplate"/>
-			<Frame name="$parentItem7" ID="7" hidden="true" inherits="OutfitterQuickSlotItemTemplate"/>
-			<Frame name="$parentItem8" ID="8" hidden="true" inherits="OutfitterQuickSlotItemTemplate"/>
-			<Frame name="$parentItem9" ID="9" hidden="true" inherits="OutfitterQuickSlotItemTemplate"/>
-			<Frame name="$parentItem10" ID="10" hidden="true" inherits="OutfitterQuickSlotItemTemplate"/>
-			<Frame name="$parentItem11" ID="11" hidden="true" inherits="OutfitterQuickSlotItemTemplate"/>
-			<Frame name="$parentItem12" ID="12" hidden="true" inherits="OutfitterQuickSlotItemTemplate"/>
-			<Frame name="$parentItem13" ID="13" hidden="true" inherits="OutfitterQuickSlotItemTemplate"/>
-			<Frame name="$parentItem14" ID="14" hidden="true" inherits="OutfitterQuickSlotItemTemplate"/>
-			<Frame name="$parentItem15" ID="15" hidden="true" inherits="OutfitterQuickSlotItemTemplate"/>
-			<Frame name="$parentItem16" ID="16" hidden="true" inherits="OutfitterQuickSlotItemTemplate"/>
-			<Frame name="$parentItem17" ID="17" hidden="true" inherits="OutfitterQuickSlotItemTemplate"/>
-			<Frame name="$parentItem18" ID="18" hidden="true" inherits="OutfitterQuickSlotItemTemplate"/>
-			<Frame name="$parentItem19" ID="19" hidden="true" inherits="OutfitterQuickSlotItemTemplate"/>
-			<Frame name="$parentItem20" ID="20" hidden="true" inherits="OutfitterQuickSlotItemTemplate"/>
-			<Frame name="$parentItem21" ID="21" hidden="true" inherits="OutfitterQuickSlotItemTemplate"/>
-			<Frame name="$parentItem22" ID="22" hidden="true" inherits="OutfitterQuickSlotItemTemplate"/>
-			<Frame name="$parentItem23" ID="23" hidden="true" inherits="OutfitterQuickSlotItemTemplate"/>
-			<Frame name="$parentItem24" ID="24" hidden="true" inherits="OutfitterQuickSlotItemTemplate"/>
-			<Frame name="$parentItem25" ID="25" hidden="true" inherits="OutfitterQuickSlotItemTemplate"/>
-			<Frame name="$parentItem26" ID="26" hidden="true" inherits="OutfitterQuickSlotItemTemplate"/>
-			<Frame name="$parentItem27" ID="27" hidden="true" inherits="OutfitterQuickSlotItemTemplate"/>
+			<Frame name="$parentItem1" id="1" hidden="true" inherits="OutfitterQuickSlotItemTemplate"/>
+			<Frame name="$parentItem2" id="2" hidden="true" inherits="OutfitterQuickSlotItemTemplate"/>
+			<Frame name="$parentItem3" id="3" hidden="true" inherits="OutfitterQuickSlotItemTemplate"/>
+			<Frame name="$parentItem4" id="4" hidden="true" inherits="OutfitterQuickSlotItemTemplate"/>
+			<Frame name="$parentItem5" id="5" hidden="true" inherits="OutfitterQuickSlotItemTemplate"/>
+			<Frame name="$parentItem6" id="6" hidden="true" inherits="OutfitterQuickSlotItemTemplate"/>
+			<Frame name="$parentItem7" id="7" hidden="true" inherits="OutfitterQuickSlotItemTemplate"/>
+			<Frame name="$parentItem8" id="8" hidden="true" inherits="OutfitterQuickSlotItemTemplate"/>
+			<Frame name="$parentItem9" id="9" hidden="true" inherits="OutfitterQuickSlotItemTemplate"/>
+			<Frame name="$parentItem10" id="10" hidden="true" inherits="OutfitterQuickSlotItemTemplate"/>
+			<Frame name="$parentItem11" id="11" hidden="true" inherits="OutfitterQuickSlotItemTemplate"/>
+			<Frame name="$parentItem12" id="12" hidden="true" inherits="OutfitterQuickSlotItemTemplate"/>
+			<Frame name="$parentItem13" id="13" hidden="true" inherits="OutfitterQuickSlotItemTemplate"/>
+			<Frame name="$parentItem14" id="14" hidden="true" inherits="OutfitterQuickSlotItemTemplate"/>
+			<Frame name="$parentItem15" id="15" hidden="true" inherits="OutfitterQuickSlotItemTemplate"/>
+			<Frame name="$parentItem16" id="16" hidden="true" inherits="OutfitterQuickSlotItemTemplate"/>
+			<Frame name="$parentItem17" id="17" hidden="true" inherits="OutfitterQuickSlotItemTemplate"/>
+			<Frame name="$parentItem18" id="18" hidden="true" inherits="OutfitterQuickSlotItemTemplate"/>
+			<Frame name="$parentItem19" id="19" hidden="true" inherits="OutfitterQuickSlotItemTemplate"/>
+			<Frame name="$parentItem20" id="20" hidden="true" inherits="OutfitterQuickSlotItemTemplate"/>
+			<Frame name="$parentItem21" id="21" hidden="true" inherits="OutfitterQuickSlotItemTemplate"/>
+			<Frame name="$parentItem22" id="22" hidden="true" inherits="OutfitterQuickSlotItemTemplate"/>
+			<Frame name="$parentItem23" id="23" hidden="true" inherits="OutfitterQuickSlotItemTemplate"/>
+			<Frame name="$parentItem24" id="24" hidden="true" inherits="OutfitterQuickSlotItemTemplate"/>
+			<Frame name="$parentItem25" id="25" hidden="true" inherits="OutfitterQuickSlotItemTemplate"/>
+			<Frame name="$parentItem26" id="26" hidden="true" inherits="OutfitterQuickSlotItemTemplate"/>
+			<Frame name="$parentItem27" id="27" hidden="true" inherits="OutfitterQuickSlotItemTemplate"/>
 		</Frames>
 		<Scripts>
 			<OnLoad>
