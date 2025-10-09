@@ -357,17 +357,18 @@ local gOutfitter_SpellNameSpecialID = {
 };
 
 local gOutfitter_AuraIconSpecialID = { --@formatter:off
-	["INV_Misc_Food_28"]           = "Dining",
-	["INV_Misc_Fork&Knife"]        = "Dining",
-
-	["Ability_Rogue_FeignDeath"]   = "Feigning",      --  rogues
+	["INV_Misc_Food_28"]    = "Dining",        --  every class
+	["INV_Misc_Fork&Knife"] = "Dining",
     
-    ["Spell_Nature_SpiritWolf"]    = "GhostWolf",     --  shamans
-	["Spell_Shadow_Shadowform"]    = "Shadowform",    --  priests
+	["ROGUE:Ability_Rogue_FeignDeath"]          = "Feigning",      --  rogues
+    
+    ["SHAMAN:Spell_Nature_SpiritWolf"]          = "GhostWolf",     --  shamans
+    
+	["PRIEST:Spell_Shadow_Shadowform"]          = "Shadowform",    --  priests
 
-    ["Spell_Nature_RavenForm"]           = "Hawk",    --  hunters
-	["Ability_Mount_Pinktiger"]          = "Beast",   --  hunters
-	["Ability_Hunter_AspectOfTheMonkey"] = "Monkey",  --  hunters
+    ["HUNTER:Spell_Nature_RavenForm"]           = "Hawk",          --  hunters
+	["HUNTER:Ability_Mount_Pinktiger"]          = "Beast",         --  hunters
+	["HUNTER:Ability_Hunter_AspectOfTheMonkey"] = "Monkey",        --  hunters
 }; --@formatter:on
 
 local Outfitter_cSpecialOutfitDescriptions = {
@@ -4044,7 +4045,7 @@ function Outfitter_GetPlayerAuraStates()
         if vTextureFilePath then
             _, _, vTextureName = _strfind(vTextureFilePath, "([^%\\]*)$");
 
-            vSpecialID = gOutfitter_AuraIconSpecialID[vTextureName]; -- try detect by buff-texture
+            vSpecialID = gOutfitter_AuraIconSpecialID[Outfitter_PlayerClassInEnglish .. ":" .. vTextureName]; -- try detect by buff-texture
             if vSpecialID then
                 vAuraStates[vSpecialID] = true;
 
