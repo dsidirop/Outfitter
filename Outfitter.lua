@@ -6,11 +6,24 @@ local AceEvent = AceLibrary:HasInstance("AceEvent-2.0") and AceLibrary("AceEvent
 
 local Outfitter_cInitializationEvent = "PLAYER_ENTERING_WORLD";
 
+local _pairs = pairs
+local _getglobal = getglobal
+
+local _getn = table.getn
+local _sort = table.sort
+local _insert = table.insert
+
+local _strsub = string.sub
+local _strgsub = string.gsub
+local _strfind = string.find
+local _strupper = string.upper
+local _strgfind = string.gfind
+
 -- BOE (Bind on Equip) cache to avoid repeated tooltip operations
 local Outfitter_BOECache = {};
 
 local _, Outfitter_PlayerClassInEnglish = UnitClass("player");
-Outfitter_PlayerClassInEnglish = string.upper(Outfitter_PlayerClassInEnglish or "UNKNOWN_CLASS");
+Outfitter_PlayerClassInEnglish = _strupper(Outfitter_PlayerClassInEnglish or "UNKNOWN_CLASS");
 
 local BANKED_FONT_COLOR = { r = 0.25, g = 0.2, b = 1.0 };
 local BANKED_FONT_COLOR_CODE = "|cff4033ff";
@@ -723,7 +736,7 @@ function Outfitter_OnLoad()
 
 	-- Tabs
 
-	PanelTemplates_SetNumTabs(this, table.getn(gOutfitter_PanelFrames));
+	PanelTemplates_SetNumTabs(this, _getn(gOutfitter_PanelFrames));
 	OutfitterFrame.selectedTab = gOutfitter_CurrentPanel;
 	PanelTemplates_UpdateTabs(this);
 
@@ -885,7 +898,7 @@ function Outfitter_RegisterOutfitEvent(pEvent, pFunction)
 		gOutfitter_OutfitEvents[pEvent] = vHandlers;
 	end
 
-	table.insert(vHandlers, pFunction);
+	_insert(vHandlers, pFunction);
 end
 
 function Outfitter_UnregisterOutfitEvent(pEvent, pFunction)
@@ -952,7 +965,7 @@ function Outfitter_RegenEnabled(pEvent)
     Outfitter_UpdateAuraStates(); -- order   now force an aura-state-reevaluation considering that we throttle down aura updates while in combat
 
 	-- Check if any shapeshift outfit is active for any class
-	for _, specialIDInfo in pairs(Outfitter_cShapeshiftSpecialIDs) do
+	for _, specialIDInfo in _pairs(Outfitter_cShapeshiftSpecialIDs) do
 		if gOutfitter_SpecialState[specialIDInfo.ID] then
 			return; -- A shapeshift form is active, so don't apply the NonCombat outfit
 		end
@@ -978,11 +991,11 @@ end
 
 function Outfitter_ProfessionCheck(pEvent)
 	local profession
-	if string.find(arg1, Outfitter_cRequiresSkinning) then
+	if _strfind(arg1, Outfitter_cRequiresSkinning) then
 		profession = "Skinning";
-	elseif string.find(arg1, Outfitter_cRequiresMining) then
+	elseif _strfind(arg1, Outfitter_cRequiresMining) then
 		profession = "Mining";
-	elseif string.find(arg1, Outfitter_cRequiresHerbalism) then
+	elseif _strfind(arg1, Outfitter_cRequiresHerbalism) then
 		profession = "Herbalism";
 	end
 
@@ -1229,7 +1242,7 @@ function Outfitter_ExecuteCommand(pCommand)
 		summary = { useOutfit = false, func = Outfitter_OutfitSummary },
 	}
 
-	local vStartIndex, vEndIndex, vCommand, vParameter = string.find(pCommand, "(%w+) ?(.*)");
+	local vStartIndex, vEndIndex, vCommand, vParameter = _strfind(pCommand, "(%w+) ?(.*)");
 
 	if not vCommand then
 		Outfitter_NoteMessage(HIGHLIGHT_FONT_COLOR_CODE .. "/outfitter wear <outfit name>" .. NORMAL_FONT_COLOR_CODE .. ": Wear an outfit");
@@ -1338,7 +1351,7 @@ function Outfitter_ShowPanel(pPanelIndex)
 
 	gOutfitter_CurrentPanel = pPanelIndex;
 
-	getglobal(gOutfitter_PanelFrames[pPanelIndex]):Show();
+	_getglobal(gOutfitter_PanelFrames[pPanelIndex]):Show();
 
 	PanelTemplates_SetTab(OutfitterFrame, pPanelIndex);
 
@@ -1365,7 +1378,7 @@ function Outfitter_HidePanel(pPanelIndex)
 		return ;
 	end
 
-	getglobal(gOutfitter_PanelFrames[pPanelIndex]):Hide();
+	_getglobal(gOutfitter_PanelFrames[pPanelIndex]):Hide();
 	gOutfitter_CurrentPanel = 0;
 end
 
@@ -1401,7 +1414,7 @@ function Outfitter_AddSubmenuItem(pFrame, pName, pValue)
 end
 
 function OutfitterItemDropDown_Initialize()
-	local vFrame = getglobal(UIDROPDOWNMENU_INIT_MENU);
+	local vFrame = _getglobal(UIDROPDOWNMENU_INIT_MENU);
 	local vItem = vFrame:GetParent():GetParent();
 	local vOutfit, vCategoryID = Outfitter_GetOutfitFromListItem(vItem);
 
@@ -1460,7 +1473,7 @@ function OutfitterItemDropDown_Initialize()
 	elseif UIDROPDOWNMENU_MENU_LEVEL == 2 then
 		if UIDROPDOWNMENU_MENU_VALUE == "BINDING" then
 			for vIndex = 1, 10 do
-				Outfitter_AddMenuItem(vFrame, getglobal("BINDING_NAME_OUTFITTER_OUTFIT" .. vIndex), "BINDING" .. vIndex, vOutfit.BindingIndex == vIndex, UIDROPDOWNMENU_MENU_LEVEL);
+				Outfitter_AddMenuItem(vFrame, _getglobal("BINDING_NAME_OUTFITTER_OUTFIT" .. vIndex), "BINDING" .. vIndex, vOutfit.BindingIndex == vIndex, UIDROPDOWNMENU_MENU_LEVEL);
 			end
 		end
 	end
@@ -1536,7 +1549,7 @@ function OutfitterMinimapDropDown_OutfitEvent(pEvent, pParameter1, pParameter2)
 end
 
 function OutfitterMinimapDropDown_AdjustScreenPosition(pMenu)
-	local vListFrame = getglobal("DropDownList1");
+	local vListFrame = _getglobal("DropDownList1");
 
 	if not vListFrame:IsVisible() then
 		return ;
@@ -1596,7 +1609,7 @@ function OutfitterMinimapDropDown_Initialize()
 
 	--
 
-	local vFrame = getglobal(UIDROPDOWNMENU_INIT_MENU);
+	local vFrame = _getglobal(UIDROPDOWNMENU_INIT_MENU);
 
 	Outfitter_AddCategoryMenuItem(Outfitter_cTitleVersion);
 	Outfitter_AddMenuItem(vFrame, Outfitter_cOpenOutfitter, 0);
@@ -1621,12 +1634,12 @@ function OutfitterMinimapDropDown_InitializeOutfitList()
 
 	--
 
-	local vFrame = getglobal(UIDROPDOWNMENU_INIT_MENU);
+	local vFrame = _getglobal(UIDROPDOWNMENU_INIT_MENU);
 	local vEquippableItems = OutfitterItemList_GetEquippableItems();
 	local vCategoryOrder = Outfitter_GetCategoryOrder();
 
 	for vCategoryIndex, vCategoryID in vCategoryOrder do
-		local vCategoryName = getglobal("Outfitter_c" .. vCategoryID .. "Outfits");
+		local vCategoryName = _getglobal("Outfitter_c" .. vCategoryID .. "Outfits");
 		local vOutfits = Outfitter_GetOutfitsByCategoryID(vCategoryID);
 
 		if Outfitter_HasVisibleOutfits(vOutfits) then
@@ -1668,9 +1681,9 @@ function OutfitterItem_SetTextColor(pItem, pRed, pGreen, pBlue)
 	local vItemNameField;
 
 	if pItem.isCategory then
-		vItemNameField = getglobal(pItem:GetName() .. "CategoryName");
+		vItemNameField = _getglobal(pItem:GetName() .. "CategoryName");
 	else
-		vItemNameField = getglobal(pItem:GetName() .. "OutfitName");
+		vItemNameField = _getglobal(pItem:GetName() .. "OutfitName");
 	end
 
 	vItemNameField:SetTextColor(pRed, pGreen, pBlue);
@@ -1707,7 +1720,7 @@ function OutfitterItem_OnEnter(pItem)
 		local vDescription = Outfitter_cCategoryDescriptions[pItem.categoryID];
 
 		if vDescription then
-			local vCategoryName = getglobal("Outfitter_c" .. pItem.categoryID .. "Outfits");
+			local vCategoryName = _getglobal("Outfitter_c" .. pItem.categoryID .. "Outfits");
 
 			GameTooltip_AddNewbieTip(vCategoryName, 1.0, 1.0, 1.0, vDescription, 1);
 		end
@@ -1840,7 +1853,7 @@ function OutfitterItem_CheckboxClicked(pItem)
 		return ;
 	end
 
-	local vCheckbox = getglobal(pItem:GetName() .. "OutfitSelected");
+	local vCheckbox = _getglobal(pItem:GetName() .. "OutfitSelected");
 
 	if vCheckbox:GetChecked() then
 		vOutfit.Disabled = nil;
@@ -1854,20 +1867,20 @@ end
 
 function OutfitterItem_SetToOutfit(pItemIndex, pOutfit, pCategoryID, pOutfitIndex, pEquippableItems)
 	local vItemName = "OutfitterItem" .. pItemIndex;
-	local vItem = getglobal(vItemName);
+	local vItem = _getglobal(vItemName);
 	local vOutfitFrameName = vItemName .. "Outfit";
-	local vOutfitFrame = getglobal(vOutfitFrameName);
-	local vItemFrame = getglobal(vItemName .. "Item");
-	local vCategoryFrame = getglobal(vItemName .. "Category");
+	local vOutfitFrame = _getglobal(vOutfitFrameName);
+	local vItemFrame = _getglobal(vItemName .. "Item");
+	local vCategoryFrame = _getglobal(vItemName .. "Category");
 	local vMissingItems, vBankedItems = OutfitterItemList_GetMissingItems(pEquippableItems, pOutfit);
 
 	vOutfitFrame:Show();
 	vCategoryFrame:Hide();
 	vItemFrame:Hide();
 
-	local vItemSelectedCheckmark = getglobal(vOutfitFrameName .. "Selected");
-	local vItemNameField = getglobal(vOutfitFrameName .. "Name");
-	local vItemMenu = getglobal(vOutfitFrameName .. "Menu");
+	local vItemSelectedCheckmark = _getglobal(vOutfitFrameName .. "Selected");
+	local vItemNameField = _getglobal(vOutfitFrameName .. "Name");
+	local vItemMenu = _getglobal(vOutfitFrameName .. "Menu");
 
 	vItemSelectedCheckmark:Show();
 
@@ -1916,12 +1929,12 @@ end
 
 function OutfitterItem_SetToItem(pItemIndex, pOutfitItem)
 	local vItemName = "OutfitterItem" .. pItemIndex;
-	local vItem = getglobal(vItemName);
+	local vItem = _getglobal(vItemName);
 	local vCategoryFrameName = vItemName .. "Category";
 	local vItemFrameName = vItemName .. "Item";
-	local vItemFrame = getglobal(vItemFrameName);
-	local vOutfitFrame = getglobal(vItemName .. "Outfit");
-	local vCategoryFrame = getglobal(vCategoryFrameName);
+	local vItemFrame = _getglobal(vItemFrameName);
+	local vOutfitFrame = _getglobal(vItemName .. "Outfit");
+	local vCategoryFrame = _getglobal(vCategoryFrameName);
 
 	vItem.isOutfitItem = true;
 	vItem.isCategory = false;
@@ -1931,8 +1944,8 @@ function OutfitterItem_SetToItem(pItemIndex, pOutfitItem)
 	vOutfitFrame:Hide();
 	vCategoryFrame:Hide();
 
-	local vItemNameField = getglobal(vItemFrameName .. "Name");
-	local vItemIcon = getglobal(vItemFrameName .. "Icon");
+	local vItemNameField = _getglobal(vItemFrameName .. "Name");
+	local vItemIcon = _getglobal(vItemFrameName .. "Icon");
 
 	vItemNameField:SetText(pOutfitItem.Name);
 
@@ -1955,20 +1968,20 @@ function OutfitterItem_SetToItem(pItemIndex, pOutfitItem)
 end
 
 function OutfitterItem_SetToCategory(pItemIndex, pCategoryID)
-	local vCategoryName = getglobal("Outfitter_c" .. pCategoryID .. "Outfits");
+	local vCategoryName = _getglobal("Outfitter_c" .. pCategoryID .. "Outfits");
 	local vItemName = "OutfitterItem" .. pItemIndex;
-	local vItem = getglobal(vItemName);
+	local vItem = _getglobal(vItemName);
 	local vCategoryFrameName = vItemName .. "Category";
-	local vOutfitFrame = getglobal(vItemName .. "Outfit");
-	local vItemFrame = getglobal(vItemName .. "Item");
-	local vCategoryFrame = getglobal(vCategoryFrameName);
+	local vOutfitFrame = _getglobal(vItemName .. "Outfit");
+	local vItemFrame = _getglobal(vItemName .. "Item");
+	local vCategoryFrame = _getglobal(vCategoryFrameName);
 
 	vOutfitFrame:Hide();
 	vCategoryFrame:Show();
 	vItemFrame:Hide();
 
-	local vItemNameField = getglobal(vCategoryFrameName .. "Name");
-	local vExpandButton = getglobal(vCategoryFrameName .. "Expand");
+	local vItemNameField = _getglobal(vCategoryFrameName .. "Name");
+	local vExpandButton = _getglobal(vCategoryFrameName .. "Expand");
 
 	vItem.MissingItems = nil;
 	vItem.BankedItems = nil;
@@ -2062,7 +2075,7 @@ end
 
 function Outfitter_SortOutfits()
 	for vCategoryID, vOutfits in gOutfitter_Settings.Outfits do
-		table.sort(vOutfits, Outfiter_CompareOutfitNames);
+		_sort(vOutfits, Outfiter_CompareOutfitNames);
 	end
 end
 
@@ -2127,7 +2140,7 @@ function Outfitter_Update(pUpdateSlotEnables)
 
 		for vItemIndex2 = vItemIndex, (Outfitter_cMaxDisplayedItems - 1) do
 			local vItemName = "OutfitterItem" .. vItemIndex2;
-			local vItem = getglobal(vItemName);
+			local vItem = _getglobal(vItemName);
 
 			vItem:Hide();
 		end
@@ -2141,7 +2154,7 @@ function Outfitter_Update(pUpdateSlotEnables)
 
 			if not gOutfitter_Collapsed[vCategoryID]
 					and vOutfits then
-				vTotalNumItems = vTotalNumItems + table.getn(vOutfits);
+				vTotalNumItems = vTotalNumItems + _getn(vOutfits);
 			end
 		end
 
@@ -2149,7 +2162,7 @@ function Outfitter_Update(pUpdateSlotEnables)
 			vTotalNumItems = vTotalNumItems + 1;
 
 			if not gOutfitter_Collapsed["OddsNEnds"] then
-				vTotalNumItems = vTotalNumItems + table.getn(vEquippableItems.UnusedItems);
+				vTotalNumItems = vTotalNumItems + _getn(vEquippableItems.UnusedItems);
 			end
 		end
 
@@ -2207,7 +2220,7 @@ function Outfitter_UpdateSlotEnables(pOutfit, pEquippableItems)
 
 	for _, vInventorySlot in Outfitter_cSlotNames do
 		local vOutfitItem = pOutfit.Items[vInventorySlot];
-		local vCheckbox = getglobal("OutfitterEnable" .. vInventorySlot);
+		local vCheckbox = _getglobal("OutfitterEnable" .. vInventorySlot);
 
 		if not vOutfitItem then
 			vCheckbox:SetChecked(false);
@@ -2247,7 +2260,7 @@ function Outfitter_FindOutfitItemIndex(pOutfit)
 			if vOutfitCategoryID == vCategoryID then
 				return vItemIndex + vOutfitIndex - 1;
 			else
-				vItemIndex = vItemIndex + table.getn(gOutfitter_Settings.Outfits[vCategoryID]);
+				vItemIndex = vItemIndex + _getn(gOutfitter_Settings.Outfits[vCategoryID]);
 			end
 		end
 	end
@@ -2291,7 +2304,7 @@ end
 
 function OutfitterStack_ClearCategory(pCategoryID)
 	local vIndex = 1;
-	local vStackLength = table.getn(gOutfitter_OutfitStack);
+	local vStackLength = _getn(gOutfitter_OutfitStack);
 	local vChanged = false;
 
 	while vIndex <= vStackLength do
@@ -2323,7 +2336,7 @@ function OutfitterStack_ClearCategory(pCategoryID)
 end
 
 function OutfitterStack_GetTemporaryOutfit()
-	local vStackSize = table.getn(gOutfitter_OutfitStack);
+	local vStackSize = _getn(gOutfitter_OutfitStack);
 
 	if vStackSize == 0 then
 		return nil;
@@ -2340,7 +2353,7 @@ end
 
 function OutfitterStack_CollapseTemporaryOutfits()
 	local vIndex = 1;
-	local vStackLength = table.getn(gOutfitter_OutfitStack);
+	local vStackLength = _getn(gOutfitter_OutfitStack);
 	local vTemporaryOutfit1 = nil;
 
 	while vIndex <= vStackLength do
@@ -2374,7 +2387,7 @@ function OutfitterStack_CollapseTemporaryOutfits()
 end
 
 function OutfitterStack_IsTopmostOutfit(pOutfit)
-	local vStackLength = table.getn(gOutfitter_OutfitStack);
+	local vStackLength = _getn(gOutfitter_OutfitStack);
 
 	if vStackLength == 0 then
 		return false;
@@ -2397,14 +2410,14 @@ function OutfitterStack_AddOutfit(pOutfit, pBelowOutfit)
 
 	-- Figure out the position to insert at
 
-	local vStackLength = table.getn(gOutfitter_OutfitStack);
+	local vStackLength = _getn(gOutfitter_OutfitStack);
 	local vInsertIndex = vStackLength + 1;
 
 	if pBelowOutfit then
-		local vFound2, vIndex = OutfitterStack_FindOutfit(pBelowOutfit);
+		local vFound2, vIndex2 = OutfitterStack_FindOutfit(pBelowOutfit);
 
 		if vFound2 then
-			vInsertIndex = vIndex;
+			vInsertIndex = vIndex2;
 		end
 	end
 
@@ -2442,12 +2455,12 @@ function OutfitterStack_AddOutfit(pOutfit, pBelowOutfit)
 
 	-- Add the outfit
 
-	table.insert(gOutfitter_OutfitStack, vInsertIndex, pOutfit);
+	_insert(gOutfitter_OutfitStack, vInsertIndex, pOutfit);
 
 	if pOutfit.Name then
-		table.insert(gOutfitter_Settings.LastOutfitStack, vInsertIndex, { Name = pOutfit.Name });
+		_insert(gOutfitter_Settings.LastOutfitStack, vInsertIndex, { Name = pOutfit.Name });
 	else
-		table.insert(gOutfitter_Settings.LastOutfitStack, vInsertIndex, pOutfit);
+		_insert(gOutfitter_Settings.LastOutfitStack, vInsertIndex, pOutfit);
 	end
 
 	gOutfitter_DisplayIsDirty = true;
@@ -2497,7 +2510,7 @@ function OutfitterStack_RestoreSavedStack()
 		end
 
 		if vOutfit then
-			table.insert(gOutfitter_OutfitStack, vOutfit);
+			_insert(gOutfitter_OutfitStack, vOutfit);
 		end
 	end
 
@@ -2827,7 +2840,7 @@ function Outfitter_GetEmptyBagSlotList()
 			return vEmptyBagSlots;
 		end
 
-		table.insert(vEmptyBagSlots, vBagSlotInfo);
+		_insert(vEmptyBagSlots, vBagSlotInfo);
 
 		vBagIndex = vBagSlotInfo.BagIndex;
 		vBagSlotIndex = vBagSlotInfo.BagSlotIndex + 1;
@@ -2848,7 +2861,7 @@ function Outfitter_GetEmptyBankSlotList()
 
 		elseif vBagSlotInfo.BagIndex > NUM_BAG_SLOTS
 				or vBagSlotInfo.BagIndex < 0 then
-			table.insert(vEmptyBagSlots, vBagSlotInfo);
+			_insert(vEmptyBagSlots, vBagSlotInfo);
 		end
 
 		vBagIndex = vBagSlotInfo.BagIndex;
@@ -2896,14 +2909,14 @@ function Outfitter_FindItemsInBagsForSlot(pSlotName)
 					end
 
 					if vItemSlotName == vInventorySlot then
-						table.insert(vItems, { BagIndex = vBagIndex, BagSlotIndex = vSlotIndex, Code = vItemInfo.Code, Name = vItemInfo.Name });
+						_insert(vItems, { BagIndex = vBagIndex, BagSlotIndex = vSlotIndex, Code = vItemInfo.Code, Name = vItemInfo.Name });
 					end
 				end
 			end
 		end
 	end
 
-	if table.getn(vItems) == 0 then
+	if _getn(vItems) == 0 then
 		return nil;
 	end
 
@@ -2935,7 +2948,7 @@ function Outfitter_BuildUnequipChangeList(pOutfit, pEquippableItems)
 		local vItem, vIgnoredItem = OutfitterItemList_FindItemOrAlt(pEquippableItems, vOutfitItem, true);
 
 		if vItem then
-			table.insert(vEquipmentChangeList, { FromLocation = vItem.Location, Item = vItem, ToLocation = nil });
+			_insert(vEquipmentChangeList, { FromLocation = vItem.Location, Item = vItem, ToLocation = nil });
 		end
 	end -- for
 
@@ -2976,7 +2989,7 @@ function Outfitter_BuildEquipmentChangeList(pOutfit, pEquippableItems)
 
 			if vOutfitItem.Code == 0 then
 				if vCurrentItemInfo then
-					table.insert(vEquipmentChangeList, { SlotName = vInventorySlot, SlotID = vSlotID, ItemName = vOutfitItem.Name, ItemLocation = nil });
+					_insert(vEquipmentChangeList, { SlotName = vInventorySlot, SlotID = vSlotID, ItemName = vOutfitItem.Name, ItemLocation = nil });
 				end
 
 			else
@@ -3007,13 +3020,13 @@ function Outfitter_BuildEquipmentChangeList(pOutfit, pEquippableItems)
 
 				else
 					pOutfit.Items[vInventorySlot].MetaSlotName = vItem.MetaSlotName;
-					table.insert(vEquipmentChangeList, { SlotName = vInventorySlot, SlotID = vSlotID, ItemName = vOutfitItem.Name, ItemMetaSlotName = vItem.MetaSlotName, ItemLocation = vItem });
+					_insert(vEquipmentChangeList, { SlotName = vInventorySlot, SlotID = vSlotID, ItemName = vOutfitItem.Name, ItemMetaSlotName = vItem.MetaSlotName, ItemLocation = vItem });
 				end
 			end
 		end -- if
 	end -- for
 
-	if table.getn(vEquipmentChangeList) == 0 then
+	if _getn(vEquipmentChangeList) == 0 then
 		return nil;
 	end
 
@@ -3067,7 +3080,7 @@ function Outfitter_FixSlotSwapChange(pEquipmentList, pChangeIndex1, pEquipmentCh
 
 			-- Insert a change to empty slot 2
 
-			table.insert(pEquipmentList, pChangeIndex1, { SlotName = pEquipmentChange2.SlotName, SlotID = pEquipmentChange2.SlotID, ItemLocation = nil });
+			_insert(pEquipmentList, pChangeIndex1, { SlotName = pEquipmentChange2.SlotName, SlotID = pEquipmentChange2.SlotID, ItemLocation = nil });
 		else
 			-- Slot 1 is going to be empty, so empty slot 2 instead
 			-- and then when slot 1 is moved it'll swap the empty space
@@ -3083,7 +3096,7 @@ function Outfitter_FixSlotSwapChange(pEquipmentList, pChangeIndex1, pEquipmentCh
 		if pEquipmentChange2.ItemLocation then
 			-- Insert a change to empty slot 1 first
 
-			table.insert(pEquipmentList, pChangeIndex1, { SlotName = pEquipmentChange1.SlotName, SlotID = pEquipmentChange1.SlotID, ItemLocation = nil });
+			_insert(pEquipmentList, pChangeIndex1, { SlotName = pEquipmentChange1.SlotName, SlotID = pEquipmentChange1.SlotID, ItemLocation = nil });
 		else
 			-- Slot 2 is going to be empty, so empty slot 1 instead
 			-- and then when slot 2 is moved it'll swap the empty space
@@ -3110,7 +3123,7 @@ function Outfitter_OptimizeEquipmentChangeList(pEquipmentChangeList)
 	local vDidSlot = {};
 
 	local vChangeIndex = 1;
-	local vNumChanges = table.getn(pEquipmentChangeList);
+	local vNumChanges = _getn(pEquipmentChangeList);
 
 	while vChangeIndex <= vNumChanges do
 		local vEquipmentChange = pEquipmentChangeList[vChangeIndex];
@@ -3138,7 +3151,7 @@ function Outfitter_OptimizeEquipmentChangeList(pEquipmentChangeList)
 
 			local vSlotID, vEmptySlotTexture = GetInventorySlotInfo("SecondaryHandSlot");
 
-			table.insert(pEquipmentChangeList, vChangeIndex, { SlotName = "SecondaryHandSlot", SlotID = vSlotID, ItemLocation = nil });
+			_insert(pEquipmentChangeList, vChangeIndex, { SlotName = "SecondaryHandSlot", SlotID = vSlotID, ItemLocation = nil });
 
 			-- Otherwise see if the change needs to be re-arranged so that slot
 			-- swapping works correctly
@@ -3155,7 +3168,7 @@ function Outfitter_OptimizeEquipmentChangeList(pEquipmentChangeList)
 
 					vDidSlot[vEquipmentChange.SlotName] = true;
 
-					vNumChanges = table.getn(pEquipmentChangeList);
+					vNumChanges = _getn(pEquipmentChangeList);
 				end
 			end
 		end
@@ -3177,7 +3190,7 @@ function Outfitter_ExecuteEquipmentChangeList(pEquipmentChangeList, pEmptyBagSlo
 			-- Remove the item
 
 			if not pEmptyBagSlots
-					or table.getn(pEmptyBagSlots) == 0 then
+					or _getn(pEmptyBagSlots) == 0 then
 				local vItemInfo = Outfitter_GetInventoryItemInfo(vEquipmentChange.SlotName);
 
 				if not vItemInfo then
@@ -3215,7 +3228,7 @@ function Outfitter_ExecuteEquipmentChangeList2(pEquipmentChangeList, pEmptySlots
 			-- Remove the item
 
 			if not pEmptySlots
-					or table.getn(pEmptySlots) == 0 then
+					or _getn(pEmptySlots) == 0 then
 				Outfitter_ErrorMessage(format(pBagsFullErrorFormat, vEquipmentChange.Item.Name));
 			else
 				local vToLocation = { BagIndex = pEmptySlots[1].BagIndex, BagSlotIndex = pEmptySlots[1].BagSlotIndex };
@@ -3364,11 +3377,11 @@ function Outfitter_InitDebugging()
 	-- Find the debug frame if there is one
 
 	for vChatIndex = 1, NUM_CHAT_WINDOWS do
-		local vChatFrame = getglobal("ChatFrame" .. vChatIndex);
+		local vChatFrame = _getglobal("ChatFrame" .. vChatIndex);
 
 		if vChatFrame
 				and (vChatFrame:IsVisible() or vChatFrame.isDocked) then
-			local vTab = getglobal("ChatFrame" .. vChatIndex .. "Tab");
+			local vTab = _getglobal("ChatFrame" .. vChatIndex .. "Tab");
 			local vName = vTab:GetText();
 
 			if vName == "Debug" then
@@ -3392,7 +3405,7 @@ function Outfitter_DebugMessage(pMessage)
 	if gOutfitter_DebugFrame then
 		gOutfitter_DebugFrame:AddMessage("DEBUG: " .. pMessage, 0.7, 0.3, 1.0);
 
-		local vTabFlash = getglobal(gOutfitter_DebugFrame:GetName() .. "TabFlash");
+		local vTabFlash = _getglobal(gOutfitter_DebugFrame:GetName() .. "TabFlash");
 
 		vTabFlash:Show();
 		UIFrameFlash(vTabFlash, 0.25, 0.25, 60, nil, 0.5, 0.5);
@@ -3418,8 +3431,8 @@ function Outfitter_NoteMessage(pMessage)
 end
 
 function Outfitter_RenameLink(pLink, pName)
-	local vMessage = string.gsub(pLink, "%[.*%]", "[" .. pName .. "]");
-	-- local	vMessage = string.gsub(pMessage, "||", "|");
+	local vMessage = _strgsub(pLink, "%[.*%]", "[" .. pName .. "]");
+	-- local	vMessage = _strgsub(pMessage, "||", "|");
 
 	DEFAULT_CHAT_FRAME:AddMessage(vMessage);
 end
@@ -3825,7 +3838,7 @@ function Outfitter_UpdateOutfitFromInventory(pOutfit, pNewItemsOutfit)
 	for vInventorySlot, vItem in pNewItemsOutfit.Items do
 		-- Only update slots which aren't in an unknown state
 
-		local vCheckbox = getglobal("OutfitterEnable" .. vInventorySlot);
+		local vCheckbox = _getglobal("OutfitterEnable" .. vInventorySlot);
 
 		if not vCheckbox:GetChecked()
 				or not vCheckbox.IsUnknown then
@@ -4022,16 +4035,16 @@ function Outfitter_GetPlayerAuraStates()
         -- in turtle wow the textures sometimes come off dud even if they do exist which is weird of
         -- course but it can bamboozle the detection-mechanism so we just scan all buffs down to 0 to be sure
         if vTextureFilePath then
-            _, _, vTextureName = string.find(vTextureFilePath, "([^%\\]*)$");
+            _, _, vTextureName = _strfind(vTextureFilePath, "([^%\\]*)$");
 
             vSpecialID = gOutfitter_AuraIconSpecialID[vTextureName]; -- try detect by buff-texture
             if vSpecialID then
                 vAuraStates[vSpecialID] = true;
 
             elseif not vAuraStates.Dining and (
-                    string.find(vTextureName, "[Ii][Nn][Vv].?[Dd][Rr][Ii][Nn][Kk]..?.?.?.?.?.?.?.?.?.?.?$")  -- INV_Drink_11/14/18 etc
-                            or string.find(vTextureName, "[Ii][Nn][Vv].?[Mm][Ii][Ss][Cc].?[Ff][Oo][Oo][Dd]..?.?.?.?.?.?.?.?.?.?.?$") -- INV_Misc_Food_11/14/18 etc
-                            or string.find(vTextureName, "[Ii][Nn][Vv].?[Mm][Ii][Ss][Cc].?[Ff][Oo][Rr][Kk]..?.?.?.?.?.?.?.?.?.?.?.?.?.?.?.?.?$") -- INV_Misc_Fork&Knife_11/14/18 etc
+                    _strfind(vTextureName, "[Ii][Nn][Vv].?[Dd][Rr][Ii][Nn][Kk]..?.?.?.?.?.?.?.?.?.?.?$")  -- INV_Drink_11/14/18 etc
+                            or _strfind(vTextureName, "[Ii][Nn][Vv].?[Mm][Ii][Ss][Cc].?[Ff][Oo][Oo][Dd]..?.?.?.?.?.?.?.?.?.?.?$") -- INV_Misc_Food_11/14/18 etc
+                            or _strfind(vTextureName, "[Ii][Nn][Vv].?[Mm][Ii][Ss][Cc].?[Ff][Oo][Rr][Kk]..?.?.?.?.?.?.?.?.?.?.?.?.?.?.?.?.?$") -- INV_Misc_Fork&Knife_11/14/18 etc
             ) then
                 vAuraStates.Dining = true;
                 if not gOutfitter_AuraIconSpecialID[vTextureName] then
@@ -4049,9 +4062,9 @@ function Outfitter_GetPlayerAuraStates()
                     elseif not vAuraStates.Riding then
                         vBuffDetailedDescription = Outfitter_GetBuffDetailedDescriptionFromTooltip();
                         if vBuffDetailedDescription and (
-                                string.find(vBuffDetailedDescription, "Riding", 1, true) --                        dont use regexes for something so simple
-                                        or string.find(vBuffDetailedDescription, "Slow and steady...", 1, true) -- turtle-wow turtle mount
-                                        or string.find(vBuffDetailedDescription, Outfitter_cMountSpeedFormat) --   better save for last the most elaborate regex for mount-speed-detection
+                                _strfind(vBuffDetailedDescription, "Riding", 1, true) --                        dont use regexes for something so simple
+                                        or _strfind(vBuffDetailedDescription, "Slow and steady...", 1, true) -- turtle-wow turtle mount
+                                        or _strfind(vBuffDetailedDescription, Outfitter_cMountSpeedFormat) --   better save for last the most elaborate regex for mount-speed-detection
                         ) then
                             vAuraStates.Riding = true;
 
@@ -4391,7 +4404,7 @@ function Outfitter_AddOutfit(pOutfit)
 		gOutfitter_Settings.Outfits[vCategoryID] = {};
 	end
 
-	table.insert(gOutfitter_Settings.Outfits[vCategoryID], pOutfit);
+	_insert(gOutfitter_Settings.Outfits[vCategoryID], pOutfit);
 	pOutfit.CategoryID = vCategoryID;
 
 	gOutfitter_DisplayIsDirty = true;
@@ -4743,7 +4756,7 @@ end
 
 function Outfitter_IsStatText(pText)
 	for vStatIndex, vStatInfo in Outfitter_cItemStatFormats do
-		local vStartIndex, vEndIndex, vValue = string.find(pText, vStatInfo.Format);
+		local vStartIndex, vEndIndex, vValue = _strfind(pText, vStatInfo.Format);
 
 		if vStartIndex then
 			vValue = tonumber(vValue);
@@ -4768,13 +4781,13 @@ function Outfitter_GetItemStatsFromTooltip(pTooltip, pDistribution)
 	local vTooltipName = pTooltip:GetName();
 
 	for vLineIndex = 1, 30 do
-		local vLeftText = getglobal(vTooltipName .. "TextLeft" .. vLineIndex):GetText();
-		-- local	vRightText = getglobal(vTooltipName.."TextRight"..vLineIndex):GetText();
+		local vLeftText = _getglobal(vTooltipName .. "TextLeft" .. vLineIndex):GetText();
+		-- local	vRightText = _getglobal(vTooltipName.."TextRight"..vLineIndex):GetText();
 
 		if vLeftText then
 			-- Check for the start of the set bonus section
 
-			local vStartIndex, vEndIndex, vValue = string.find(vLeftText, "%(%d/%d%)");
+			local vStartIndex, vEndIndex, vValue = _strfind(vLeftText, "%(%d/%d%)");
 
 			if vStartIndex then
 				break ;
@@ -4782,12 +4795,12 @@ function Outfitter_GetItemStatsFromTooltip(pTooltip, pDistribution)
 
 			--
 
-			for vStatString in string.gfind(vLeftText, "([^/]+)") do
-				local vStatIDs, vValue = Outfitter_IsStatText(vStatString);
+			for vStatString in _strgfind(vLeftText, "([^/]+)") do
+				local vStatIDs, vValue2 = Outfitter_IsStatText(vStatString);
 
 				if vStatIDs then
 					for vStatIDIndex, vStatID in vStatIDs do
-						OutfitterStats_AddStatValue(vStats, vStatID, vValue, pDistribution);
+						OutfitterStats_AddStatValue(vStats, vStatID, vValue2, pDistribution);
 					end
 				end
 			end
@@ -4801,10 +4814,10 @@ function Outfitter_TooltipContainsText(pTooltip, pText)
 	local vTooltipName = pTooltip:GetName();
 
 	for vLineIndex = 1, 30 do
-		local vLeftText = getglobal(vTooltipName .. "TextLeft" .. vLineIndex):GetText();
+		local vLeftText = _getglobal(vTooltipName .. "TextLeft" .. vLineIndex):GetText();
 
 		if vLeftText
-				and string.find(vLeftText, pText) then
+				and _strfind(vLeftText, pText) then
 			return true;
 		end
 	end -- for vLineIndex
@@ -5027,12 +5040,12 @@ function Outfitter_SetButtonEnable(pButton, pEnabled)
 		pButton:Enable();
 		pButton:SetAlpha(1.0);
 		pButton:EnableMouse(true);
-		--getglobal(pButton:GetName().."Text"):SetAlpha(1.0);
+		--_getglobal(pButton:GetName().."Text"):SetAlpha(1.0);
 	else
 		pButton:Disable();
 		pButton:SetAlpha(0.7);
 		pButton:EnableMouse(false);
-		--getglobal(pButton:GetName().."Text"):SetAlpha(0.7);
+		--_getglobal(pButton:GetName().."Text"):SetAlpha(0.7);
 	end
 end
 
@@ -5097,8 +5110,8 @@ function Outfitter_OutfitItemSelected(pMenu, pValue)
 	elseif pValue == "PARTIAL" then
 		vOutfit.IsAccessory = nil;
 		Outfitter_UpdateOutfitCategory(vOutfit);
-	elseif string.sub(pValue, 1, 7) == "BINDING" then
-		Outfitter_SetOutfitBindingIndex(vOutfit, tonumber(string.sub(pValue, 8)));
+	elseif _strsub(pValue, 1, 7) == "BINDING" then
+		Outfitter_SetOutfitBindingIndex(vOutfit, tonumber(_strsub(pValue, 8)));
 	elseif pValue == "REBUILD" then
 		Outfitter_AskRebuildOutfit(vOutfit, vCategoryID);
 	elseif pValue == "UPDATE" then
@@ -5143,7 +5156,7 @@ function Outfitter_GetStatIDName(pStatID)
 end
 
 function OutfitterStatDropdown_Initialize()
-	local vFrame = getglobal(UIDROPDOWNMENU_INIT_MENU);
+	local vFrame = _getglobal(UIDROPDOWNMENU_INIT_MENU);
 
 	if UIDROPDOWNMENU_MENU_LEVEL == 2 then
 		for vStatIndex, vStatInfo in Outfitter_cItemStatInfo do
@@ -5185,14 +5198,14 @@ function OutfitterDropDown_SetSelectedValue(pDropDown, pValue)
 	-- Scan for submenus
 
 	local vRootListFrameName = "DropDownList1";
-	local vRootListFrame = getglobal(vRootListFrameName);
+	local vRootListFrame = _getglobal(vRootListFrameName);
 	local vRootNumItems = vRootListFrame.numButtons;
 
 	for vRootItemIndex = 1, vRootNumItems do
-		local vItem = getglobal(vRootListFrameName .. "Button" .. vRootItemIndex);
+		local vItem = _getglobal(vRootListFrameName .. "Button" .. vRootItemIndex);
 
 		if vItem.hasArrow then
-			local vSubMenuFrame = getglobal("DropDownList2");
+			local vSubMenuFrame = _getglobal("DropDownList2");
 
 			UIDROPDOWNMENU_OPEN_MENU = pDropDown:GetName();
 			UIDROPDOWNMENU_MENU_VALUE = vItem.value;
@@ -5203,9 +5216,8 @@ function OutfitterDropDown_SetSelectedValue(pDropDown, pValue)
 
 			-- All done if the item text got set successfully
 
-			local vItemText = UIDropDownMenu_GetText(pDropDown);
-
-			if vItemText and vItemText ~= "" then
+			local vItemText2 = UIDropDownMenu_GetText(pDropDown);
+			if vItemText2 and vItemText2 ~= "" then
 				return ;
 			end
 
@@ -5219,7 +5231,7 @@ end
 
 function OutfitterScrollbarTrench_SizeChanged(pScrollbarTrench)
 	local vScrollbarTrenchName = pScrollbarTrench:GetName();
-	local vScrollbarTrenchMiddle = getglobal(vScrollbarTrenchName .. "Middle");
+	local vScrollbarTrenchMiddle = _getglobal(vScrollbarTrenchName .. "Middle");
 
 	local vMiddleHeight = pScrollbarTrench:GetHeight() - 51;
 	vScrollbarTrenchMiddle:SetHeight(vMiddleHeight);
@@ -5457,7 +5469,7 @@ function Outfitter_GetCurrentOutfitInfo()
 		return "", nil;
 	end
 
-	local vStackLength = table.getn(gOutfitter_OutfitStack);
+	local vStackLength = _getn(gOutfitter_OutfitStack);
 
 	if vStackLength == 0 then
 		return "", nil;
@@ -5479,10 +5491,10 @@ function Outfitter_CheckDatabase()
 		local vOutfits = gOutfitter_Settings.Outfits[vCategoryID];
 
 		if gOutfitter_Settings.Outfits then
-			for vCategoryID, vOutfits in gOutfitter_Settings.Outfits do
-				for vIndex, vOutfit in vOutfits do
-					if Outfitter_OutfitIsComplete(vOutfit, true) then
-						Outfitter_AddOutfitItem(vOutfit, "AmmoSlot", 0, 0, "", 0);
+			for vCategoryID, vOutfits2 in gOutfitter_Settings.Outfits do
+				for vIndex, vOutfit2 in vOutfits2 do
+					if Outfitter_OutfitIsComplete(vOutfit2, true) then
+						Outfitter_AddOutfitItem(vOutfit2, "AmmoSlot", 0, 0, "", 0);
 					end
 				end
 			end
@@ -5523,8 +5535,8 @@ function Outfitter_CheckDatabase()
 
 	if gOutfitter_Settings.Outfits then
 		for vCategoryID, vOutfits in gOutfitter_Settings.Outfits do
-			for vIndex, vOutfit in vOutfits do
-				vOutfit.CategoryID = vCategoryID;
+			for vIndex, vOutfit2 in vOutfits do
+				vOutfit2.CategoryID = vCategoryID;
 			end
 		end
 	end
@@ -5543,8 +5555,8 @@ function Outfitter_CheckDatabase()
 	-- Scan the outfits and make sure everything is in order
 
 	for vCategoryID, vOutfits in gOutfitter_Settings.Outfits do
-		for vIndex, vOutfit in vOutfits do
-			Outfitter_CheckOutfit(vOutfit);
+		for vIndex, vOutfit2 in vOutfits do
+			Outfitter_CheckOutfit(vOutfit2);
 		end
 	end
 end
@@ -5664,7 +5676,7 @@ function OutfitterItemList_AddItem(pItemList, pItem)
 		pItemList.ItemsByCode[pItem.Code] = vItemFamily;
 	end
 
-	table.insert(vItemFamily, pItem);
+	_insert(vItemFamily, pItem);
 
 	-- Add the item to the slot list
 
@@ -5675,7 +5687,7 @@ function OutfitterItemList_AddItem(pItemList, pItem)
 		pItemList.ItemsBySlot[pItem.ItemSlotName] = vItemSlot;
 	end
 
-	table.insert(vItemSlot, pItem);
+	_insert(vItemSlot, pItem);
 
 	-- Add the item to the bags
 
@@ -5962,7 +5974,7 @@ function OutfitterItemList_FindAllItems(pItemList, pOutfitItem, pAllowSubCodeWil
 	for vIndex, vItem in vItemFamily do
 		if (pAllowSubCodeWildcard and not pOutfitItem.SubCode)
 				or vItem.SubCode == pOutfitItem.SubCode then
-			table.insert(rItems, vItem);
+			_insert(rItems, vItem);
 			vNumItemsFound = vNumItemsFound + 1;
 		end
 	end
@@ -6084,13 +6096,13 @@ function OutfitterItemList_GetMissingItems(pEquippableItems, pOutfit)
 					vMissingItems = {};
 				end
 
-				table.insert(vMissingItems, vOutfitItem);
+				_insert(vMissingItems, vOutfitItem);
 			elseif Outfitter_IsBankBagIndex(vItem.Location.BagIndex) then
 				if not vBankedItems then
 					vBankedItems = {};
 				end
 
-				table.insert(vBankedItems, vOutfitItem);
+				_insert(vBankedItems, vOutfitItem);
 			end
 		end
 	end
@@ -6126,7 +6138,7 @@ function OutfitterItemList_CompiledUnusedItemsList(pEquippableItems)
 					vUnusedItems = {};
 				end
 
-				table.insert(vUnusedItems, vOutfitItem);
+				_insert(vUnusedItems, vOutfitItem);
 			end
 		end
 	end
@@ -6275,7 +6287,7 @@ function OutfitterQuickSlots_Close()
 end
 
 function OutfitterQuickSlots_OnLoad()
-	table.insert(UIMenus, this:GetName());
+	_insert(UIMenus, this:GetName());
 end
 
 function OutfitterQuickSlots_OnShow()
@@ -6346,7 +6358,7 @@ function OutfitterQuickSlots_SetNumSlots(pNumSlots)
 	OutfitterQuickSlotsBackStart2:Show();
 
 	for vIndex = 1, pNumSlots do
-		local vSlotItem = getglobal("OutfitterQuickSlotsItem" .. vIndex);
+		local vSlotItem = _getglobal("OutfitterQuickSlotsItem" .. vIndex);
 
 		vSlotItem:ClearAllPoints();
 
@@ -6374,7 +6386,7 @@ function OutfitterQuickSlots_SetNumSlots(pNumSlots)
 			OutfitterQuickSlotsBackEnd2:Hide();
 			OutfitterQuickSlotsBackStart2:Hide();
 		end
-		local vSlotItem = getglobal("OutfitterQuickSlotsItem" .. vIndex);
+		local vSlotItem = _getglobal("OutfitterQuickSlotsItem" .. vIndex);
 
 		vSlotItem:Hide();
 	end
@@ -6391,7 +6403,7 @@ function OutfitterQuickSlots_SetNumSlots(pNumSlots)
 
 	if pNumSlots > 0 then
 		for vIndex = 1, pNumSlots - 1 do
-			getglobal("OutfitterQuickSlotsBack" .. vIndex):Show();
+			_getglobal("OutfitterQuickSlotsBack" .. vIndex):Show();
 		end
 
 		if pNumSlots > 18 then
@@ -6401,7 +6413,7 @@ function OutfitterQuickSlots_SetNumSlots(pNumSlots)
 		end
 
 		for vIndex = pNumSlotsTemp, Outfitter_cMaxNumQuickSlots - 1 do
-			getglobal("OutfitterQuickSlotsBack" .. vIndex):Hide();
+			_getglobal("OutfitterQuickSlotsBack" .. vIndex):Hide();
 		end
 
 		if pNumSlots == 19 then
@@ -6427,8 +6439,8 @@ function OutfitterQuickSlots_SetNumSlots(pNumSlots)
 end
 
 function OutfitterQuickSlots_SetSlotToBag(pQuickSlotIndex, pBagIndex, pBagSlotIndex)
-	local vQuickSlotItem = getglobal("OutfitterQuickSlotsItem" .. pQuickSlotIndex);
-	local vQuickSlotItemButton = getglobal("OutfitterQuickSlotsItem" .. pQuickSlotIndex .. "Item1");
+	local vQuickSlotItem = _getglobal("OutfitterQuickSlotsItem" .. pQuickSlotIndex);
+	local vQuickSlotItemButton = _getglobal("OutfitterQuickSlotsItem" .. pQuickSlotIndex .. "Item1");
 
 	vQuickSlotItem:SetID(pBagIndex);
 	vQuickSlotItemButton:SetID(pBagSlotIndex);
@@ -6546,7 +6558,7 @@ function Outfitter_DepositOutfit(pOutfit, pUniqueItemsOnly)
 	-- Eliminate items which are already banked
 
 	local vChangeIndex = 1;
-	local vNumChanges = table.getn(vEquipmentChangeList);
+	local vNumChanges = _getn(vEquipmentChangeList);
 
 	while vChangeIndex <= vNumChanges do
 		vEquipmentChange = vEquipmentChangeList[vChangeIndex];
@@ -6584,7 +6596,7 @@ function Outfitter_WithdrawOutfit(pOutfit)
 	-- Eliminate items which aren't in the bank
 
 	local vChangeIndex = 1;
-	local vNumChanges = table.getn(vEquipmentChangeList);
+	local vNumChanges = _getn(vEquipmentChangeList);
 
 	while vChangeIndex <= vNumChanges do
 		vEquipmentChange = vEquipmentChangeList[vChangeIndex];
@@ -6662,7 +6674,7 @@ function OutfitterSlotIterators_New(pEquippableItems, pFilterStats)
 	local vNumCombinations = 1;
 
 	for vInventorySlot, vItems in pEquippableItems.ItemsBySlot do
-		local vNumItems = table.getn(vItems);
+		local vNumItems = _getn(vItems);
 
 		if vInventorySlot ~= "AmmoSlot"
 				and vNumItems > 0 then
@@ -6679,7 +6691,7 @@ function OutfitterSlotIterators_New(pEquippableItems, pFilterStats)
 							vFilteredItems = {};
 						end
 
-						table.insert(vFilteredItems, vItem);
+						_insert(vFilteredItems, vItem);
 						vNumItems = vNumItems + 1;
 					end
 				end
@@ -6690,7 +6702,7 @@ function OutfitterSlotIterators_New(pEquippableItems, pFilterStats)
 			-- Add the filtered list
 
 			if vFilteredItems then
-				table.insert(vSlotIterators.Slots, { ItemSlotName = vInventorySlot, Items = vItems, Index = 0, MaxIndex = vNumItems });
+				_insert(vSlotIterators.Slots, { ItemSlotName = vInventorySlot, Items = vItems, Index = 0, MaxIndex = vNumItems });
 
 				vNumCombinations = vNumCombinations * (vNumItems + 1);
 
@@ -6723,17 +6735,7 @@ function OutfitterSlotIterators_Increment(pSlotIterators)
 end
 
 function OutfitterSlotIterators_GetOutfit(pSlotIterators)
-	local vOutfit = Outfitter_NewEmptyOutfit();
-
-	for _, vItems in pSlotIterators.Slots do
-		-- if vItems.Index > 0 then
-		-- 	local	vItem = vItems.Items[vItems.Index];
-		-- 	
-		-- 	Outfitter_AddOutfitItem(vOutfit, vItems.ItemSlotName, vItem.Code, vItem.SubCode, vItem.Name, vItem.EnchantCode);
-		-- end
-	end
-
-	return vOutfit;
+	return Outfitter_NewEmptyOutfit();
 end
 
 function OutfitterStats_AddStatValue(pStats, pStat, pValue, pDistribution)
@@ -7049,13 +7051,13 @@ function Outfitter_pfUISkin()
 			end
 
 			for i = 0, 13 do
-				local m = getglobal( "OutfitterItem" .. i .. "OutfitMenu")
+				local m = _getglobal( "OutfitterItem" .. i .. "OutfitMenu")
 				pfUI.api.SkinArrowButton( m, "down" )
 
-				local cb = getglobal( "OutfitterItem" .. i .. "OutfitSelected")
+				local cb = _getglobal( "OutfitterItem" .. i .. "OutfitSelected")
 				skin_checkbox( cb )
 
-				local c = getglobal( "OutfitterItem" .. i .. "CategoryExpand")
+				local c = _getglobal( "OutfitterItem" .. i .. "CategoryExpand")
 				pfUI.api.SkinCollapseButton( c )
 				c.icon.backdrop:SetPoint("TOPLEFT", -2, 1 )
 				c.icon.backdrop:SetPoint("BOTTOMRIGHT", 1, -2 )
@@ -7063,12 +7065,12 @@ function Outfitter_pfUISkin()
 
 			OutfitterShowMinimapButton:SetPoint( "TOPLEFT", 15, -90 )
 			for _, v in { "ShowMinimapButton", "RememberVisibility", "ShowHotkeyMessages", "ShowCurrentOutfit", "HideDisabledOutfits", "KeepScanningBuffsEvenInCombat" } do
-				local cb = getglobal( "Outfitter" .. v )
+				local cb = _getglobal( "Outfitter" .. v )
 				skin_checkbox( cb )
 			end
 
 			for _, v in { "Head", "Neck", "Shoulder", "Back", "Chest", "Shirt", "Tabard", "Wrist", "Hands", "Waist", "Legs", "Feet", "Finger0", "Finger1", "Trinket0", "Trinket1", "MainHand", "SecondaryHand", "Ranged", "Ammo" } do
-				local cb = getglobal( "OutfitterEnable" .. v .. "Slot")
+				local cb = _getglobal( "OutfitterEnable" .. v .. "Slot")
 				skin_checkbox( cb )
 			end
 		end )
