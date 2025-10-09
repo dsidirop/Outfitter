@@ -349,28 +349,26 @@ local gOutfitter_AuraIconsBlacklistedForTooltipAnalysis = {
 }
 
 local gOutfitter_SpellNameSpecialID = {
-	[Outfitter_cEvocate] = "Evocate",
 	[Outfitter_cAspectOfThePack] = "Pack",
 	[Outfitter_cAspectOfTheWild] = "Wild",
-	[Outfitter_cAspectOfTheBeast] = "Beast",
 	[Outfitter_cAspectOfTheCheetah] = "Cheetah",
 };
 
 local gOutfitter_AuraIconSpecialID = { --@formatter:off
-	["INV_Misc_Food_28"]    = "Dining",        --  every class
-	["INV_Misc_Fork&Knife"] = "Dining",
+	["INV_MISC_FOOD_28"]    = "Dining",        --  every class
+	["INV_MISC_FORK&KNIFE"] = "Dining",
 
-    ["MAGE:Spell_Nature_Purge"]                 = "Evocate",       --  mages
+    ["MAGE:SPELL_NATURE_PURGE"]                 = "Evocate",       --  mages
     
-	["ROGUE:Ability_Rogue_FeignDeath"]          = "Feigning",      --  rogues
+	["ROGUE:ABILITY_ROGUE_FEIGNDEATH"]          = "Feigning",      --  rogues
     
-    ["SHAMAN:Spell_Nature_SpiritWolf"]          = "GhostWolf",     --  shamans
+    ["SHAMAN:SPELL_NATURE_SPIRITWOLF"]          = "GhostWolf",     --  shamans
     
-	["PRIEST:Spell_Shadow_Shadowform"]          = "Shadowform",    --  priests
+	["PRIEST:SPELL_SHADOW_SHADOWFORM"]          = "Shadowform",    --  priests
 
-    ["HUNTER:Spell_Nature_RavenForm"]           = "Hawk",          --  hunters
-	["HUNTER:Ability_Mount_Pinktiger"]          = "Beast",         --  hunters
-	["HUNTER:Ability_Hunter_AspectOfTheMonkey"] = "Monkey",        --  hunters
+    ["HUNTER:SPELL_NATURE_RAVENFORM"]           = "Hawk",          --  hunters
+	["HUNTER:ABILITY_MOUNT_PINKTIGER"]          = "Beast",         --  hunters
+	["HUNTER:ABILITY_HUNTER_ASPECTOFTHEMONKEY"] = "Monkey",        --  hunters
 }; --@formatter:on
 
 local Outfitter_cSpecialOutfitDescriptions = {
@@ -4046,6 +4044,8 @@ function Outfitter_GetPlayerAuraStates()
         -- course but it can bamboozle the detection-mechanism so we just scan all buffs down to 0 to be sure
         if vTextureFilePath then
             _, _, vTextureName = _strfind(vTextureFilePath, "([^%\\]*)$");
+            
+            vTextureName = _strupper(vTextureName or "");
 
             vSpecialID = gOutfitter_AuraIconSpecialID[Outfitter_PlayerClassInEnglish .. ":" .. vTextureName]; -- try detect by buff-texture
             if vSpecialID then
