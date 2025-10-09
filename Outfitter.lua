@@ -342,6 +342,12 @@ local Outfitter_cClassSpecialOutfits = {
 	},
 };
 
+local gOutfitter_AuraIconsAlwaysWhitelistedForTooltipAnalysis = {
+    ["ABILITY_MOUNT_PINKTIGER"] = true, -- overlaps with hunter's aspect of the beast so we need to always check its tooltip
+    ["ABILITY_MOUNT_WHITETIGER"] = true, -- overlaps with hunter's aspect of the pack so we need to always check its tooltip
+    ["ABILITY_MOUNT_JUNGLETIGER"] = true, -- overlaps with hunter's aspect of the cheetah so we need to always check its tooltip
+}
+
 local gOutfitter_AuraIconsBlacklistedForTooltipAnalysis = {
     -- buff-textures that we noticed not qualifying as riding-buffs
     -- are placed here by Outfitter_GetPlayerAuraStates()   this helps
@@ -349,26 +355,31 @@ local gOutfitter_AuraIconsBlacklistedForTooltipAnalysis = {
 }
 
 local gOutfitter_SpellNameSpecialID = {
-	[Outfitter_cAspectOfThePack] = "Pack",
-	[Outfitter_cAspectOfTheWild] = "Wild",
-	[Outfitter_cAspectOfTheCheetah] = "Cheetah",
+    [Outfitter_cAspectOfTheWild] = "Wild",
+    [Outfitter_cAspectOfThePack] = "Pack", --    these buffs are sharing the same texture as actual riding-mounts so
+    [Outfitter_cAspectOfTheBeast] = "Beast", --  we can only be 100% if we explicitly check their respective tooltip texts
+    [Outfitter_cAspectOfTheCheetah] = "Cheetah"
 };
 
 local gOutfitter_AuraIconSpecialID = { --@formatter:off
-	["INV_MISC_FOOD_28"]    = "Dining",        --  every class
+	["INV_MISC_FOOD_28"]    = "Dining",                             --  every class
 	["INV_MISC_FORK&KNIFE"] = "Dining",
 
-    ["MAGE:SPELL_NATURE_PURGE"]                 = "Evocate",       --  mages
+    ["MAGE:SPELL_NATURE_PURGE"]                  = "Evocate",       --  mages
     
-	["ROGUE:ABILITY_ROGUE_FEIGNDEATH"]          = "Feigning",      --  rogues
+	["ROGUE:ABILITY_ROGUE_FEIGNDEATH"]           = "Feigning",      --  rogues
     
-    ["SHAMAN:SPELL_NATURE_SPIRITWOLF"]          = "GhostWolf",     --  shamans
+    ["SHAMAN:SPELL_NATURE_SPIRITWOLF"]           = "GhostWolf",     --  shamans
     
-	["PRIEST:SPELL_SHADOW_SHADOWFORM"]          = "Shadowform",    --  priests
+	["PRIEST:SPELL_SHADOW_SHADOWFORM"]           = "Shadowform",    --  priests
 
-    ["HUNTER:SPELL_NATURE_RAVENFORM"]           = "Hawk",          --  hunters
-	["HUNTER:ABILITY_MOUNT_PINKTIGER"]          = "Beast",         --  hunters
-	["HUNTER:ABILITY_HUNTER_ASPECTOFTHEMONKEY"] = "Monkey",        --  hunters
+    ["HUNTER:SPELL_NATURE_RAVENFORM"]            = "Hawk",          --  hunters
+    ["HUNTER:ABILITY_HUNTER_ASPECTOFTHEMONKEY"]  = "Monkey",
+    ["HUNTER:SPELL_NATURE_PROTECTIONFORMNATURE"] = "Wild"
+    
+    -- ["HUNTER:ABILITY_MOUNT_WHITETIGER"]       = "Pack", --  dont   these particular textures are shared with actual riding-mounts and will cause the mechanism to get confused  :( 
+	-- ["HUNTER:ABILITY_MOUNT_PINKTIGER"]        = "Beast",
+	-- ["HUNTER:ABILITY_MOUNT_JUNGLETIGER"]      = "Cheetah" 
 }; --@formatter:on
 
 local Outfitter_cSpecialOutfitDescriptions = {
@@ -4061,7 +4072,7 @@ function Outfitter_GetPlayerAuraStates()
                     gOutfitter_AuraIconSpecialID[vTextureName] = "Dining"; -- cache it for next time so as to dodge regex-searching
                 end
 
-            elseif not gOutfitter_AuraIconsBlacklistedForTooltipAnalysis[vTextureName] then -- have we already evaluated negatively this sort of buff-texture in the past?
+            elseif gOutfitter_AuraIconsAlwaysWhitelistedForTooltipAnalysis[vTextureName] or not gOutfitter_AuraIconsBlacklistedForTooltipAnalysis[vTextureName] then -- have we already evaluated negatively this sort of buff-texture in the past?
                 
                 vBuffName = Outfitter_GetBuffNameFromTooltip(vBuffIndex);                
                 if vBuffName then
@@ -4082,13 +4093,13 @@ function Outfitter_GetPlayerAuraStates()
                             vAuraStates.Riding = true;
                             vMatchesTooltipAnalysis = true;
 
-                            if not gOutfitter_AuraIconSpecialID[vTextureName] then -- 00 smart caching
+                            if not gOutfitter_AuraIconSpecialID[Outfitter_PlayerClassInEnglish .. ":" .. vTextureName] then -- 00 smart caching
                                 gOutfitter_AuraIconSpecialID[vTextureName] = "Riding";
                             end
                         end
                     end
 
-                    if not vMatchesTooltipAnalysis then
+                    if not gOutfitter_AuraIconsAlwaysWhitelistedForTooltipAnalysis[vTextureName] and not vMatchesTooltipAnalysis then
                         gOutfitter_AuraIconsBlacklistedForTooltipAnalysis[vTextureName] = true --10
                     end
 
