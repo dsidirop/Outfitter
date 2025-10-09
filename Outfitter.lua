@@ -359,6 +359,8 @@ local gOutfitter_SpellNameSpecialID = {
 local gOutfitter_AuraIconSpecialID = { --@formatter:off
 	["INV_Misc_Food_28"]    = "Dining",        --  every class
 	["INV_Misc_Fork&Knife"] = "Dining",
+
+    ["MAGE:Spell_Nature_Purge"]                 = "Evocate",       --  mages
     
 	["ROGUE:Ability_Rogue_FeignDeath"]          = "Feigning",      --  rogues
     
