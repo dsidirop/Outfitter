@@ -4039,26 +4039,29 @@ function Outfitter_GetPlayerAuraStates()
                 end
 
             else
-                local vTextLine1, vTextLine2 = Outfitter_GetBuffTooltipText(vBuffIndex);
-
+                local vTextLine1 = Outfitter_GetBuffTooltipTextLeft1(vBuffIndex);
                 if vTextLine1 then
                     vSpecialID = gOutfitter_SpellNameSpecialID[vTextLine1]; -- try detect by localized-buff-name
 
                     if vSpecialID then
                         vAuraStates[vSpecialID] = true;
 
-                    elseif not vAuraStates.Riding and vTextLine2
-                            and (
-                            string.find(vTextLine2, Outfitter_cMountSpeedFormat) or -- Mount fix by Red Mage Joe
-                                    string.find(vTextLine2, "Riding") or
-                                    string.find(vTextLine2, "Slow and steady...")
-                    ) then
-                        vAuraStates.Riding = true;
+                    elseif not vAuraStates.Riding then
+                        local vTextLine2 = Outfitter_GetBuffTooltipTextLeft2();
+                        if vTextLine2 and (
+                                string.find(vTextLine2, "Riding", 1, true) --                        dont use regexes for something so simple
+                                        or string.find(vTextLine2, "Slow and steady...", 1, true) -- turtle-wow turtle mount
+                                        or string.find(vTextLine2, Outfitter_cMountSpeedFormat) --   better save for last the most elaborate regex for mount-speed-detection
+                        ) then
+                            vAuraStates.Riding = true;
 
-                        if not gOutfitter_AuraIconSpecialID[vTextureName] then -- 00 smart caching
-                            gOutfitter_AuraIconSpecialID[vTextureName] = "Riding";
+                            if not gOutfitter_AuraIconSpecialID[vTextureName] then -- 00 smart caching
+                                gOutfitter_AuraIconSpecialID[vTextureName] = "Riding";
+                            end
                         end
                     end
+
+                    OutfitterTooltip:Hide();
                 end
             end            
         end
@@ -4071,24 +4074,21 @@ function Outfitter_GetPlayerAuraStates()
     --      trick for all other buffs/auras because some buffs share textures and we can only rely on the localized-buff-name to truly tell them apart
 end
 
-function Outfitter_GetBuffTooltipText(pBuffIndex)
-	OutfitterTooltip:SetOwner(OutfitterFrame, "ANCHOR_BOTTOMRIGHT", 0, 0);
-	OutfitterTooltip:SetUnitBuff("player", pBuffIndex);
+function Outfitter_GetBuffTooltipTextLeft1(pBuffIndex)
+    OutfitterTooltip:SetOwner(OutfitterFrame, "ANCHOR_BOTTOMRIGHT", 0, 0);
+    OutfitterTooltip:SetUnitBuff("player", pBuffIndex);
 
-	local vText1, vText2;
-
-	if OutfitterTooltipTextLeft1:IsShown() then
-		vText1 = OutfitterTooltipTextLeft1:GetText();
-	end -- if IsShown
-
-	if OutfitterTooltipTextLeft2:IsShown() then
-		vText2 = OutfitterTooltipTextLeft2:GetText();
-	end -- if IsShown
-
-	OutfitterTooltip:Hide();
-
-	return vText1, vText2;
+    return OutfitterTooltipTextLeft1:IsShown()
+            and OutfitterTooltipTextLeft1:GetText()
+            or nil;
 end
+
+function Outfitter_GetBuffTooltipTextLeft2()
+    return OutfitterTooltipTextLeft2:IsShown()
+            and OutfitterTooltipTextLeft2:GetText()
+            or nil;
+end
+
 
 local _lastAuraStatesScanTimestamp = 0
 function Outfitter_UpdateAuraStates()
