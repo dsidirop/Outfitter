@@ -356,9 +356,9 @@ local gOutfitter_AuraIconsBlacklistedForTooltipAnalysis = {
 
 local gOutfitter_SpellNameSpecialID = {
     [Outfitter_cAspectOfTheWild] = "Wild",
-    [Outfitter_cAspectOfThePack] = "Pack", --    these buffs are sharing the same texture as actual riding-mounts so
-    [Outfitter_cAspectOfTheBeast] = "Beast", --  we can only be 100% if we explicitly check their respective tooltip texts
-    [Outfitter_cAspectOfTheCheetah] = "Cheetah"
+    [Outfitter_cAspectOfThePack] = "Pack", --        bear in mind that these three buffs are sharing the
+    [Outfitter_cAspectOfTheBeast] = "Beast", --      same texture as actual riding-mounts so we can only
+    [Outfitter_cAspectOfTheCheetah] = "Cheetah" --   be 100% if we explicitly check their respective tooltip texts
 };
 
 local gOutfitter_AuraIconSpecialID = { --@formatter:off
