@@ -4015,23 +4015,23 @@ function Outfitter_GetPlayerAuraStates()
         Monkey = false, -- detected by texture
     };
 
-    local vTextureFilePath;
+    local vTextureFilePath, vTextureName, vSpecialID, vBuffName, vBuffDetailedDescription;
     for vBuffIndex = 32, 0, -1 do --exhaustive search from 32 (most recent buff) down to 0 (oldest buff even though we could stop at 1) to prioritize the detection of recent buffs first
         vTextureFilePath = UnitBuff("player", vBuffIndex);
 
         -- in turtle wow the textures sometimes come off dud even if they do exist which is weird of
         -- course but it can bamboozle the detection-mechanism so we just scan all buffs down to 0 to be sure
         if vTextureFilePath then
-            local _, _, vTextureName = string.find(vTextureFilePath, "([^%\\]*)$");
+            _, _, vTextureName = string.find(vTextureFilePath, "([^%\\]*)$");
 
-            local vSpecialID = gOutfitter_AuraIconSpecialID[vTextureName]; -- try detect by buff-texture
+            vSpecialID = gOutfitter_AuraIconSpecialID[vTextureName]; -- try detect by buff-texture
             if vSpecialID then
                 vAuraStates[vSpecialID] = true;
 
             elseif not vAuraStates.Dining and (
                     string.find(vTextureName, "[Ii][Nn][Vv].?[Dd][Rr][Ii][Nn][Kk]..?.?.?.?.?.?.?.?.?.?.?$")  -- INV_Drink_11/14/18 etc
                             or string.find(vTextureName, "[Ii][Nn][Vv].?[Mm][Ii][Ss][Cc].?[Ff][Oo][Oo][Dd]..?.?.?.?.?.?.?.?.?.?.?$") -- INV_Misc_Food_11/14/18 etc
-                            or string.find(vTextureName, "[Ii][Nn][Vv].?[Mm][Ii][Ss][Cc].?[Ff][Oo][Rr][Kk]..?.?.?.?.?.?.?.?.?.?.?$") -- INV_Misc_Fork&Knife_11/14/18 etc
+                            or string.find(vTextureName, "[Ii][Nn][Vv].?[Mm][Ii][Ss][Cc].?[Ff][Oo][Rr][Kk]..?.?.?.?.?.?.?.?.?.?.?.?.?.?.?.?.?$") -- INV_Misc_Fork&Knife_11/14/18 etc
             ) then
                 vAuraStates.Dining = true;
                 if not gOutfitter_AuraIconSpecialID[vTextureName] then
@@ -4039,19 +4039,19 @@ function Outfitter_GetPlayerAuraStates()
                 end
 
             else
-                local vTextLine1 = Outfitter_GetBuffTooltipTextLeft1(vBuffIndex);
-                if vTextLine1 then
-                    vSpecialID = gOutfitter_SpellNameSpecialID[vTextLine1]; -- try detect by localized-buff-name
+                vBuffName = Outfitter_GetBuffNameFromTooltip(vBuffIndex);
+                if vBuffName then
+                    vSpecialID = gOutfitter_SpellNameSpecialID[vBuffName]; -- try detect by localized-buff-name
 
                     if vSpecialID then
                         vAuraStates[vSpecialID] = true;
 
                     elseif not vAuraStates.Riding then
-                        local vTextLine2 = Outfitter_GetBuffTooltipTextLeft2();
-                        if vTextLine2 and (
-                                string.find(vTextLine2, "Riding", 1, true) --                        dont use regexes for something so simple
-                                        or string.find(vTextLine2, "Slow and steady...", 1, true) -- turtle-wow turtle mount
-                                        or string.find(vTextLine2, Outfitter_cMountSpeedFormat) --   better save for last the most elaborate regex for mount-speed-detection
+                        vBuffDetailedDescription = Outfitter_GetBuffDetailedDescriptionFromTooltip();
+                        if vBuffDetailedDescription and (
+                                string.find(vBuffDetailedDescription, "Riding", 1, true) --                        dont use regexes for something so simple
+                                        or string.find(vBuffDetailedDescription, "Slow and steady...", 1, true) -- turtle-wow turtle mount
+                                        or string.find(vBuffDetailedDescription, Outfitter_cMountSpeedFormat) --   better save for last the most elaborate regex for mount-speed-detection
                         ) then
                             vAuraStates.Riding = true;
 
@@ -4074,7 +4074,7 @@ function Outfitter_GetPlayerAuraStates()
     --      trick for all other buffs/auras because some buffs share textures and we can only rely on the localized-buff-name to truly tell them apart
 end
 
-function Outfitter_GetBuffTooltipTextLeft1(pBuffIndex)
+function Outfitter_GetBuffNameFromTooltip(pBuffIndex)
     OutfitterTooltip:SetOwner(OutfitterFrame, "ANCHOR_BOTTOMRIGHT", 0, 0);
     OutfitterTooltip:SetUnitBuff("player", pBuffIndex);
 
@@ -4083,7 +4083,7 @@ function Outfitter_GetBuffTooltipTextLeft1(pBuffIndex)
             or nil;
 end
 
-function Outfitter_GetBuffTooltipTextLeft2()
+function Outfitter_GetBuffDetailedDescriptionFromTooltip()
     return OutfitterTooltipTextLeft2:IsShown()
             and OutfitterTooltipTextLeft2:GetText()
             or nil;
