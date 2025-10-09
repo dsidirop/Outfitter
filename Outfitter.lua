@@ -342,6 +342,12 @@ local Outfitter_cClassSpecialOutfits = {
 	},
 };
 
+local gOutfitter_AuraIconsBlacklistedForTooltipAnalysis = {
+    -- buff-textures that we noticed not qualifying as riding-buffs
+    -- are placed here by Outfitter_GetPlayerAuraStates()   this helps
+    -- speed up buff-scanning by skipping irrelevant buffs in followup buff-scans
+}
+
 local gOutfitter_SpellNameSpecialID = {
 	[Outfitter_cEvocate] = "Evocate",
 	[Outfitter_cAspectOfThePack] = "Pack",
@@ -4028,7 +4034,7 @@ function Outfitter_GetPlayerAuraStates()
         Monkey = false, -- detected by texture
     };
 
-    local vTextureFilePath, vTextureName, vSpecialID, vBuffName, vBuffDetailedDescription;
+    local vTextureFilePath, vTextureName, vSpecialID, vBuffName, vBuffDetailedDescription, vMatchesTooltipAnalysis;
     for vBuffIndex = 32, 0, -1 do --exhaustive search from 32 (most recent buff) down to 0 (oldest buff even though we could stop at 1) to prioritize the detection of recent buffs first
         vTextureFilePath = UnitBuff("player", vBuffIndex);
 
@@ -4051,13 +4057,16 @@ function Outfitter_GetPlayerAuraStates()
                     gOutfitter_AuraIconSpecialID[vTextureName] = "Dining"; -- cache it for next time so as to dodge regex-searching
                 end
 
-            else
-                vBuffName = Outfitter_GetBuffNameFromTooltip(vBuffIndex);
+            elseif not gOutfitter_AuraIconsBlacklistedForTooltipAnalysis[vTextureName] then -- have we already evaluated negatively this sort of buff-texture in the past?
+                
+                vBuffName = Outfitter_GetBuffNameFromTooltip(vBuffIndex);                
                 if vBuffName then
                     vSpecialID = gOutfitter_SpellNameSpecialID[vBuffName]; -- try detect by localized-buff-name
 
+                    vMatchesTooltipAnalysis = false;
                     if vSpecialID then
                         vAuraStates[vSpecialID] = true;
+                        vMatchesTooltipAnalysis = true;
 
                     elseif not vAuraStates.Riding then
                         vBuffDetailedDescription = Outfitter_GetBuffDetailedDescriptionFromTooltip();
@@ -4067,11 +4076,16 @@ function Outfitter_GetPlayerAuraStates()
                                         or _strfind(vBuffDetailedDescription, Outfitter_cMountSpeedFormat) --   better save for last the most elaborate regex for mount-speed-detection
                         ) then
                             vAuraStates.Riding = true;
+                            vMatchesTooltipAnalysis = true;
 
                             if not gOutfitter_AuraIconSpecialID[vTextureName] then -- 00 smart caching
                                 gOutfitter_AuraIconSpecialID[vTextureName] = "Riding";
                             end
                         end
+                    end
+
+                    if not vMatchesTooltipAnalysis then
+                        gOutfitter_AuraIconsBlacklistedForTooltipAnalysis[vTextureName] = true --10
                     end
 
                     OutfitterTooltip:Hide();
@@ -4083,8 +4097,9 @@ function Outfitter_GetPlayerAuraStates()
     return vAuraStates;
     
     -- 00   dynamically learn the riding-mount-textures and cache them for next time to avoid the expensive tooltip-scans we can afford
-    --      to do this for mounts because the textures are fairly standard and almost exclusively used for riding    but we cant do this
-    --      trick for all other buffs/auras because some buffs share textures and we can only rely on the localized-buff-name to truly tell them apart
+    --      to do this for mounts because the textures are fairly standard and almost exclusively used for riding
+    --
+    -- 10   if a buff-texture proves fruitless for buff-detection then blacklist it to avoid tooltip scanning next time
 end
 
 function Outfitter_GetBuffNameFromTooltip(pBuffIndex)
