@@ -360,7 +360,8 @@ local gOutfitter_AuraIconSpecialID = { --@formatter:off
 	["INV_Misc_Food_28"]           = "Dining",
 	["INV_Misc_Fork&Knife"]        = "Dining",
 
-	["Ability_Rogue_FeignDeath"]   = "Feigning",      --  priests/rogues
+	["Ability_Rogue_FeignDeath"]   = "Feigning",      --  rogues
+    
     ["Spell_Nature_SpiritWolf"]    = "GhostWolf",     --  shamans
 	["Spell_Shadow_Shadowform"]    = "Shadowform",    --  priests
 
@@ -4148,7 +4149,7 @@ function Outfitter_UpdateAuraStates()
     
     local vAuraStates = Outfitter_GetPlayerAuraStates(); -- check for special buffs for rogues/priests/shamans/mages/hunters
     for vSpecialID, vIsActive in vAuraStates do
-        if vSpecialID == "Feigning" then -- priest
+        if vSpecialID == "Feigning" then -- rogues
             gOutfitter_IsFeigning = vIsActive;
         else
             if not gOutfitter_SpecialState[vSpecialID] then
